@@ -3,6 +3,8 @@ defmodule Qcl.Reader do
 
   require Logger
 
+  alias Qcl.Parser
+
   def start_link(port) do
     GenServer.start_link(__MODULE__, port, name: __MODULE__)
   end
@@ -20,6 +22,6 @@ defmodule Qcl.Reader do
   end
 
   def process_data(data) do
-    IO.inspect data
+    Parser.parse(data)
   end
 end
