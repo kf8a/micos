@@ -2,6 +2,7 @@
   "circuits_uart": {:hex, :circuits_uart, "1.3.1", "8c0a56f06828133a0b08363ecb994350a9529d388a912357d31829ae617cd801", [:mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm"},
   "elixir_make": {:hex, :elixir_make, "0.5.2", "96a28c79f5b8d34879cd95ebc04d2a0d678cfbbd3e74c43cb63a76adf0ee8054", [:mix], [], "hexpm"},
   "exml": {:hex, :exml, "0.1.1", "1f580101641781e23dbda396ae8a4ea5dcf1be526859e59f3129921610f4afd3", [:mix], [], "hexpm"},
+  "gen_stage": {:hex, :gen_stage, "0.14.1", "9d46723fda072d4f4bb31a102560013f7960f5d80ea44dcb96fd6304ed61e7a4", [:mix], [], "hexpm"},
   "meeseeks": {:hex, :meeseeks, "0.11.0", "479cdc4f1781cd520ff950dd06e8d529c16dbcad45586bfea6d2b6cc5d2409f0", [:mix], [{:meeseeks_html5ever, "~> 0.11.0", [hex: :meeseeks_html5ever, repo: "hexpm", optional: false]}], "hexpm"},
   "meeseeks_html5ever": {:hex, :meeseeks_html5ever, "0.11.0", "5aaf9c895874fded42a40167841964fe30f5b73b217fb4c9e9b83f8337344d3d", [:mix], [{:rustler, "~> 0.20.0", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm"},
   "nimble_parsec": {:hex, :nimble_parsec, "0.5.0", "90e2eca3d0266e5c53f8fbe0079694740b9c91b6747f2b7e3c5d21966bba8300", [:mix], [], "hexpm"},
