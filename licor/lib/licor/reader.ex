@@ -1,5 +1,7 @@
-defmodule LicorReader do
+defmodule Licor.Reader do
   use GenServer
+
+  alias Licor.Parser
 
   def start_link(state \\ []) do
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
@@ -31,7 +33,7 @@ defmodule LicorReader do
   end
 
   def process_data(data) do
-    result = LicorParser.parse(data)
+    result = Parser.parse(data)
     IO.inspect result
   end
 end

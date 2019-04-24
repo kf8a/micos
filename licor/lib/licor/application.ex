@@ -9,7 +9,7 @@ defmodule Licor.Application do
     # List all child processes to be supervised
     children = [
       # Starts a worker by calling: Licor.Worker.start_link(arg)
-      # {Licor.Worker, arg}
+      {Licor.Reader, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

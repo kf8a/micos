@@ -1,4 +1,4 @@
-defmodule LicorParser do
+defmodule Licor.Parser do
 
   def parse(data) do
     doc = Exml.parse(data)
