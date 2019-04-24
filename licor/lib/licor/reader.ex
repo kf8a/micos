@@ -21,7 +21,7 @@ defmodule Licor.Reader do
 
   def handle_info({:circuits_uart, "ttyUSB0", data}, state) do
     result = process_data(data)
-    Logger.info result
+    Logger.info IO.inspect result
     {:noreply, Map.put(state, :result, result)}
   end
 
