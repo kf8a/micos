@@ -5,8 +5,10 @@ defmodule Licor.Reader do
 
   alias Licor.Parser
 
-  def start_link(state \\ []) do
-    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  @port Application.get_env(:licor, :port)
+
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, @port, name: __MODULE__)
   end
 
   def init(state) do
@@ -21,7 +23,7 @@ defmodule Licor.Reader do
     {:reply, result, state}
   end
 
-  def handle_info({:circuits_uart, "ttyUSB0", data}, state) do
+  def handle_info({:circuits_uart, @port, data}, state) do
     result = process_data(data)
     Logger.info inspect(result)
     {:noreply, Map.put(state, :result, result)}

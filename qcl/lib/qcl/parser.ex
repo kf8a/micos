@@ -15,7 +15,7 @@ defmodule Qcl.Parser do
     {:ok, datetime} = Enum.fetch(data, 0)
     {:ok, date_list, _rest, _, _, _} = datetime
                                         |> String.trim
-                                        |> Qcl.DatetimeParser.datetime
+                                        |> DatetimeParser.datetime
 
     [year, month, day, hour,minute, sec, millisec] = date_list
     {:ok, naive_date} = NaiveDateTime.new(year, month, day, hour, minute, sec, millisec*1000)
