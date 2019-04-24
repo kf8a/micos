@@ -8,8 +8,7 @@ defmodule Licor.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Licor.Worker.start_link(arg)
-      {Licor.Reader, []}
+      {Licor.Reader, "ttyUSB0"}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

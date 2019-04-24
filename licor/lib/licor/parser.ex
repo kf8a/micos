@@ -37,5 +37,4 @@ defmodule Licor.Parser do
     |> String.to_float
   end
 
-
 end
