@@ -13,7 +13,7 @@ defmodule Qcl.Reader do
     {:ok, %{uart: pid}}
   end
 
-  def handle_info({:circuits_uart, "ttyUSB0", data}, state) do
+  def handle_info({:circuits_uart, "ttyUSB1", data}, state) do
     result = process_data(data)
     Logger.info inspect(result)
     {:noreply, Map.put(state, :result, result)}
