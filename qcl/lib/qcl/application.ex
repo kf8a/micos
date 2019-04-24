@@ -8,8 +8,7 @@ defmodule Qcl.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Qcl.Worker.start_link(arg)
-      # {Qcl.Worker, arg}
+      {Qcl.Reader, "ttyUSB1"}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
