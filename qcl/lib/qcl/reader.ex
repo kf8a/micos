@@ -25,7 +25,7 @@ defmodule Qcl.Reader do
 
   def handle_info({:circuits_uart, @port, data}, state) do
     result = process_data(data)
-    Logger.info inspect(result)
+    Logger.debug inspect(result)
     {:noreply, Map.put(state, :result, result)}
   end
 
