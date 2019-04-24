@@ -5,9 +5,9 @@ defmodule LicorReader do
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
-  def init(state) do
-
-    {:ok, state}
+  def init(_state) do
+    {:ok, pid} = setup("ttyUSB0")
+    {:ok, pid}
   end
 
   def setup(port) do
@@ -16,26 +16,22 @@ defmodule LicorReader do
     {:ok, pid}
   end
 
+  def handle_info({:circuits_uart, "ttyUSB0", data}, state) do
+    process_data(data)
+    {:noreply, state}
+  end
+
   def read(pid) do
     receive do
-      {:circuits_uart, pid, data} ->
-        process_data(pid,data)
+      {:circuits_uart, _pid, data} ->
+        process_data(data)
 
     end
     read(pid)
   end
 
-  def process_data(_pid, data) do
+  def process_data(data) do
     result = LicorParser.parse(data)
-    #<li820><data><celltemp>5.1464400e1</celltemp><cellpres>9.8119945e1</cellpres><co2>4.5745673e2</co2><co2abs>7.0640377e-2</co2abs><ivolt>1.7046508e1</ivolt><raw>3265640,3115406</raw></data></li820>
-    # co2 = Exml.get data, "/li820/data/co2"
-    # temperature = Exml.get data, "/li820/data/celltemp"
-    # co2 = data |> xpath(~x"//li820/data/co2/text()")
-    # temperature = data |> xpath(~x"//li820/data/celltemp/text()")
-    # pressure = data |> xpath(~x"//li820/data/cellpres/text()")
-    # co2_abs = data |> xpath(~x"//li820/data/co2abs/text()")
-    # ivolt = data |> xpath(~x"//li820/data/ivolt/text()")
-    # raw = data |> xpath(~x"//li820/data/raw/text()")
     IO.inspect result
   end
 end
