@@ -2,6 +2,8 @@ alias NimbleCSV.RFC4180, as: CSV
 
 defmodule Qcl.Parser do
 
+  alias Qcl.DatetimeParser
+
   def parse(raw_data) do
     [data] = CSV.parse_string(raw_data, skip_headers: false)
     %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
@@ -17,8 +19,7 @@ defmodule Qcl.Parser do
 
     [year, month, day, hour,minute, sec, millisec] = date_list
     {:ok, naive_date} = NaiveDateTime.new(year, month, day, hour, minute, sec, millisec*1000)
-    {:ok, instrument_date} = DateTime.from_naive(naive_date, "Etc/UTC")
-    instrument_date
+    naive_date
   end
 
   defp ch4_ppm(data) do
@@ -49,24 +50,3 @@ defmodule Qcl.Parser do
   end
 end
 
-defmodule Qcl.DatetimeParser do
-  import NimbleParsec
-  # 2019/04/24 17:15:48.530
-  date =
-    integer(4)
-    |> ignore(string("/"))
-    |> integer(2)
-    |> ignore(string("/"))
-    |> integer(2)
-
-  time =
-    integer(2)
-    |> ignore(string(":"))
-    |> integer(2)
-    |> ignore(string(":"))
-    |> integer(2)
-    |> ignore(string("."))
-    |> integer(3)
-
-  defparsec :datetime, date |> ignore(string(" ")) |> concat(time)
-end

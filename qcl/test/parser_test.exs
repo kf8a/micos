@@ -8,8 +8,7 @@ defmodule ParserTest do
   end
 
   test "parsing for instrument datetime", context do
-    {:ok, datetime, 0 } = DateTime.from_iso8601("2019-04-24T17:15:48.530000Z")
-    assert context[:instrument_datetime] == datetime
+    assert context[:instrument_datetime] == ~N[2019-04-24 17:15:48.530000]
   end
 
   test "parsing for ch4_ppm", context do

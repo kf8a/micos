@@ -10,10 +10,6 @@ defmodule Licor.Reader do
   end
 
   def init(state) do
-    setup(state)
-  end
-
-  def setup(port) do
     {:ok, pid} = Circuits.UART.start_link
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid}}
