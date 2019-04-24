@@ -27,7 +27,6 @@ defmodule LicorReader do
 
   def process_data(_pid, data) do
     #<li820><data><celltemp>5.1464400e1</celltemp><cellpres>9.8119945e1</cellpres><co2>4.5745673e2</co2><co2abs>7.0640377e-2</co2abs><ivolt>1.7046508e1</ivolt><raw>3265640,3115406</raw></data></li820>
-    doc = Meeseeks.parse(data)
     # co2 = Exml.get data, "/li820/data/co2"
     # temperature = Exml.get data, "/li820/data/celltemp"
     # co2 = data |> xpath(~x"//li820/data/co2/text()")
@@ -36,6 +35,6 @@ defmodule LicorReader do
     # co2_abs = data |> xpath(~x"//li820/data/co2abs/text()")
     # ivolt = data |> xpath(~x"//li820/data/ivolt/text()")
     # raw = data |> xpath(~x"//li820/data/raw/text()")
-    IO.inspect %{datetime: DateTime.utc_now, data: doc }
+    # IO.inspect %{datetime: DateTime.utc_now, data: doc }
   end
 end

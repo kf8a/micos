@@ -22,8 +22,8 @@ defmodule Licor.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+       {:exml, "~> 0.1.1"},
       {:circuits_uart, "~> 1.3"},
-      {:meeseeks, "~> 0.11.0"},
     ]
   end
 end
