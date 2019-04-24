@@ -11,7 +11,7 @@ defmodule Licor.Reader do
     GenServer.start_link(__MODULE__, @port, name: __MODULE__)
   end
 
-  def init(state) do
+  def init(port) do
     {:ok, pid} = Circuits.UART.start_link
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid}}
