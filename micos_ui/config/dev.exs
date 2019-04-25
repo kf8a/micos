@@ -52,7 +52,8 @@ config :micos_ui, MicosUiWeb.Endpoint,
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
       ~r{priv/gettext/.*(po)$},
       ~r{lib/micos_ui_web/views/.*(ex)$},
-      ~r{lib/micos_ui_web/templates/.*(eex)$}
+      ~r{lib/micos_ui_web/templates/.*(eex)$},
+      ~r{lib/my_app_web/live/.*(ex)$}
     ]
   ]
 
@@ -65,11 +66,3 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
-
-# Configure your database
-config :micos_ui, MicosUi.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "micos_ui_dev",
-  hostname: "localhost",
-  pool_size: 10

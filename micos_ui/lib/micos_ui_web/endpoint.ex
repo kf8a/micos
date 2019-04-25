@@ -1,6 +1,8 @@
 defmodule MicosUiWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :micos_ui
 
+  socket "/live", Phoenix.LiveView.Socket
+
   socket "/socket", MicosUiWeb.UserSocket,
     websocket: true,
     longpoll: false
@@ -40,7 +42,7 @@ defmodule MicosUiWeb.Endpoint do
   plug Plug.Session,
     store: :cookie,
     key: "_micos_ui_key",
-    signing_salt: "yrU42YLu"
+    signing_salt: "l6ZyNDAt"
 
   plug MicosUiWeb.Router
 end

@@ -8,11 +8,3 @@ config :micos_ui, MicosUiWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
-
-# Configure your database
-config :micos_ui, MicosUi.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "micos_ui_test",
-  hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
