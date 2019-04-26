@@ -26,13 +26,13 @@ defmodule Licor.Reader do
     GenServer.cast(__MODULE__, {:unregister, client_pid})
   end
 
-  def process_data(data) do
-    Parser.parse(data)
+  def process_data(data, pid) do
+    result = Parser.parse(data)
+    Process.send(pid, {:parser, result})
   end
 
-  def broadcast(result, state) do
-    state[:listeners]
-    |> Enum.map(fn x -> Process.send(x, result, []) end)
+  def broadcast(result, listeners) do
+    Enum.map(listeners, fn x -> Process.send(x, result, []) end)
   end
 
   def current_value, do: GenServer.call(__MODULE__, :current_value)
@@ -42,10 +42,14 @@ defmodule Licor.Reader do
   end
 
   def handle_info({:circuits_uart, @port, data}, state) do
-    result = process_data(data)
-    Logger.debug inspect(result)
-    broadcast(result, state)
+    Task.start(__MODULE__, :process_data, [result, self())
     {:noreply, Map.put(state, :result, result)}
+  end
+
+  def handle_info({:parser, result}, state) do
+    Logger.debug inspect(result)
+    broadcast(result, state[:listeners])
+    {:noreply, state
   end
 
   def handle_cast({:register, pid}, state) do
