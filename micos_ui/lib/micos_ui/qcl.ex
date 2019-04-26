@@ -5,8 +5,6 @@ defmodule MicosUi.Qcl do
   alias MicosUiWeb.Endpoint
   alias Qcl.Reader
 
-  require Logger
-
   def start_link(_) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -19,7 +17,6 @@ defmodule MicosUi.Qcl do
   end
 
   def handle_info(result, state) do
-    Logger.info inspect(result)
     Endpoint.broadcast_from(self(), "qcl", "data", %{qcl: result})
     {:noreply, state}
   end
