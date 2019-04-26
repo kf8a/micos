@@ -9,7 +9,8 @@ defmodule MicosUi.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      MicosUiWeb.Endpoint
+      MicosUiWeb.Endpoint,
+      MicosUi.Instrument
       # Starts a worker by calling: MicosUi.Worker.start_link(arg)
       # {MicosUi.Worker, arg},
     ]
