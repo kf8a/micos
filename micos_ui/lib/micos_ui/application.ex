@@ -10,8 +10,10 @@ defmodule MicosUi.Application do
     children = [
       # Start the endpoint when the application starts
       MicosUiWeb.Endpoint,
-      MicosUi.Instrument
+      MicosUi.Instrument,
+      # {Phoenix.PubSub.PG2, [name: "micos"]}
       # Starts a worker by calling: MicosUi.Worker.start_link(arg)
+
       # {MicosUi.Worker, arg},
     ]
 
