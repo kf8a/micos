@@ -1,7 +1,9 @@
 defmodule MicosUi.Instrument do
   use GenServer
 
-   alias MicosUiWeb.Endpoint
+  alias MicosUiWeb.Endpoint
+
+  require Logger
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{sampling: false, data: [] }, name: MicosUi.Instrument)
