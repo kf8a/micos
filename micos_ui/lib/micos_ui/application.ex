@@ -10,13 +10,10 @@ defmodule MicosUi.Application do
     children = [
       # Start the endpoint when the application starts
       MicosUiWeb.Endpoint,
+      # Start instrument
       MicosUi.Licor,
-      # MicosUi.Qcl,
+      MicosUi.Qcl,
       MicosUi.Instrument,
-      # {Phoenix.PubSub.PG2, [name: "micos"]}
-      # Starts a worker by calling: MicosUi.Worker.start_link(arg)
-
-      # {MicosUi.Worker, arg},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

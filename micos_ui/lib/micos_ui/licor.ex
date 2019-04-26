@@ -2,6 +2,8 @@ defmodule MicosUi.Licor do
 
   use GenServer
 
+  require Logger
+
   alias MicosUiWeb.Endpoint
 
   def start_link(_) do
@@ -9,13 +11,15 @@ defmodule MicosUi.Licor do
   end
 
   def init(_status) do
+    Endpoint.subscribe("licor")
     {:ok, _ } = Licor.Reader.start_link([])
     Licor.Reader.register(self())
-    Endpoint.subscribe("licor")
     {:ok, []}
   end
 
   def handle_info(result, state) do
+    Logger.info "licor"
+    Logger.info result
     Endpoint.broadcast_from(self(), "licor", "data", {:licor, result})
     {:noreply, state}
   end
