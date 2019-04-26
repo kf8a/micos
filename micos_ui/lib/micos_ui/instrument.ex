@@ -48,18 +48,21 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(%{licor: result}, %{sampling: true, data: _} = state) do
+    Logger.info "licor: #{inspect(result)}"
     state = Map.put(state, :licor, result)
     {:noreply, state}
   end
 
   def handle_info(%{qcl: result}, %{sampling: true, data: data} = state) do
+    Logger.info "qcl: #{inspect(result)}"
     datum = create_datum(state[:qcl], result)
     state = Map.put(state, :data, [datum | data])
     Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
-  def handle_info(_, state) do
+  def handle_info(data, state) do
+    Logger.info "unknown #{inspect(data)}"
     {:noreply, state}
   end
 
