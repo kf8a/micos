@@ -23,6 +23,10 @@ defmodule Licor.Reader do
     GenServer.cast(__MODULE__, :register, client_pid)
   end
 
+  def unregister(client_pid) do
+    GenServer.cast(__MODULE__, :unregister, client_pid)
+  end
+
   def process_data(data) do
     Parser.parse(data)
   end
@@ -47,6 +51,11 @@ defmodule Licor.Reader do
 
   def handle_cast(:register, pid, state) do
     listeners = state[:listeners] ++ [ pid ]
+    {:noreply, Map.put(state, :listeners, listeners)}
+  end
+
+  def handle_cast(:unregister, pid, state) do
+    listeners = List.delete(state[:listeners],   pid)
     {:noreply, Map.put(state, :listeners, listeners)}
   end
 end
