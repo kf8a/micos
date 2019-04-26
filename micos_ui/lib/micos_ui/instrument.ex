@@ -45,14 +45,6 @@ defmodule MicosUi.Instrument do
     {:noreply, state}
   end
 
-  # def handle_info(:tick, %{sampling: true, data: data} = state) do
-  #   new_data = %{datetime: DateTime.utc_now}
-  #   Endpoint.broadcast_from(self(), "data", "new", new_data)
-  #   data = data ++ [new_data]
-  #   Process.send_after(self(), :tick, 1_000)
-  #   {:noreply, Map.put(state, :data, data)}
-  # end
-
   def handle_info(%{licor: result}, %{sampling: true, data: _} = state) do
     state = Map.put(state, :licor, result)
     {:noreply, state}
@@ -65,17 +57,9 @@ defmodule MicosUi.Instrument do
     {:noreply, state}
   end
 
-  def handle_info(%{licor: _result}, state) do
+  def handle_info(_, state) do
     {:noreply, state}
   end
-
-  def handle_info({:qcl, _result}, state) do
-    {:noreply, state}
-  end
-
-  # def handle_info(:tick, state) do
-  #   {:noreply, state}
-  # end
 
   defp subscribe() do
     Endpoint.subscribe("data")

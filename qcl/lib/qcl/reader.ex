@@ -46,7 +46,7 @@ defmodule Qcl.Reader do
   end
 
   def handle_info({:parser, result}, state) do
-    Logger.info inspect(result)
+    Logger.debug inspect(result)
     broadcast(result, state[:listeners])
     {:noreply, state}
   end
