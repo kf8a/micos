@@ -31,15 +31,13 @@ defmodule MicosUi.Instrument do
 
   def handle_cast(:stop, state) do
     Endpoint.broadcast_from(self(), "sampling", "stop", DateTime.utc_now)
-    Endpoint.unsubscribe("data")
-    Endpoint.unsubscribe("sampling")
+    unsubscribe()
     Map.put(state, :sampling, false)
     {:noreply, Map.put(state, :sampling, false)}
   end
 
   def handle_cast(:start, state) do
-    Endpoint.subscribe( "data")
-    Endpoint.subscribe( "sampling")
+    subscribe()
     Endpoint.broadcast_from(self(), "sampling", "start", DateTime.utc_now)
     Process.send_after(self(), :tick, 1_000)
     state = Map.put(state, :sampling, true)
@@ -55,7 +53,46 @@ defmodule MicosUi.Instrument do
     {:noreply, Map.put(state, :data, data)}
   end
 
+  def handle_info(%{licor: result}, %{sampling: true, data: _} = state) do
+    state = Map.put(state, :licor, result)
+    {:noreply, state}
+  end
+
+  def handle_info({:qcl, result}, %{sampling: true, data: data} = state) do
+    datum = create_datum(state[:qcl], result)
+    state = Map.put(state, :data, [datum | data])
+    {:noreply, state}
+  end
+
+  def handle_info(%{licor: _result}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:qcl, _result}, state) do
+    {:noreply, state}
+  end
+
   def handle_info(:tick, state) do
     {:noreply, state}
+  end
+
+  defp subscribe() do
+    Endpoint.subscribe("data")
+    Endpoint.subscribe("sampling")
+    Endpoint.subscribe("licor")
+    Endpoint.subscribe("qcl")
+  end
+
+  defp unsubscribe() do
+    Endpoint.unsubscribe("data")
+    Endpoint.unsubscribe("sampling")
+    Endpoint.unsubscribe("licor")
+    Endpoint.unsubscribe("qcl")
+  end
+
+  defp create_datum(qcl, licor) do
+    IO.inspect qcl
+    IO.inspect licor
+    []
   end
 end
