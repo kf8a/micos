@@ -17,7 +17,7 @@ defmodule MicosUi.Qcl do
   end
 
   def handle_info(result, state) do
-    Endpoint.broadcast_from(self(), "qcl", "data", {qcl:, result})
+    Endpoint.broadcast_from(self(), "qcl", "data", {qcl: result})
     {:noreply, state}
   end
 end
