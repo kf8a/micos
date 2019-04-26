@@ -49,7 +49,8 @@ defmodule MicosUi.Instrument do
 
   def handle_info(%Phoenix.Socket.Broadcast{event: event, topic: "licor"}, %{sampling: true, data: _} = state) do
     Logger.info "licor: #{inspect(event[:payload])}"
-    state = Map.put(state, :licor, result)
+
+    state = Map.put(state, :licor, event[:payload])
     {:noreply, state}
   end
 
