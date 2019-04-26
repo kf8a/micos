@@ -42,7 +42,6 @@ defmodule Licor.Reader do
   end
 
   def handle_info({:circuits_uart, @port, data}, state) do
-    Logger.debug inspect data
     Task.start(__MODULE__, :process_data, [data, self()])
     {:noreply, state}
   end

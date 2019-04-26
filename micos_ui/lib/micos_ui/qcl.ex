@@ -19,7 +19,7 @@ defmodule MicosUi.Qcl do
   end
 
   def handle_info(result, state) do
-    Logger.info result
+    Logger.info(inspect(result))
     Endpoint.broadcast_from(self(), "qcl", "data", %{qcl: result})
     {:noreply, state}
   end
