@@ -28,7 +28,7 @@ defmodule Licor.Reader do
 
   def process_data(data, pid) do
     result = Parser.parse(data)
-    Process.send(pid, {:parser, result})
+    Process.send(pid, {:parser, result}, [])
   end
 
   def broadcast(result, listeners) do
@@ -42,14 +42,14 @@ defmodule Licor.Reader do
   end
 
   def handle_info({:circuits_uart, @port, data}, state) do
-    Task.start(__MODULE__, :process_data, [result, self())
-    {:noreply, Map.put(state, :result, result)}
+    Task.start(__MODULE__, :process_data, [data, self()])
+    {:noreply, state}
   end
 
   def handle_info({:parser, result}, state) do
     Logger.debug inspect(result)
     broadcast(result, state[:listeners])
-    {:noreply, state
+    {:noreply, state}
   end
 
   def handle_cast({:register, pid}, state) do
