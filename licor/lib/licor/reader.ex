@@ -12,9 +12,24 @@ defmodule Licor.Reader do
   end
 
   def init(port) do
+    subscribe([])
     {:ok, pid} = Circuits.UART.start_link
+
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
-    {:ok, %{uart: pid}}
+    {:ok, {%{uart: pid, listeners: []}}
+  end
+
+  def register(client_pid) do
+    GenServer.cast(__MODULE__, :register, client_pid)
+  end
+
+  def process_data(data) do
+    Parser.parse(data)
+  end
+
+  def broadcast(result, state) do
+    state[:listeners]
+    |> Enum.map(fn x -> send x result end)
   end
 
   def current_value, do: GenServer.call(__MODULE__, :current_value)
@@ -26,10 +41,12 @@ defmodule Licor.Reader do
   def handle_info({:circuits_uart, @port, data}, state) do
     result = process_data(data)
     Logger.debug inspect(result)
+    broadcast(result)
     {:noreply, Map.put(state, :result, result)}
   end
 
-  def process_data(data) do
-    Parser.parse(data)
+  def handle_cast(:register, pid, state) do
+    listeners = state[:listeners] ++ [ pid ]
+    {:noreply, Map.put(state, :listeners, listeners)}
   end
 end
