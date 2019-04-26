@@ -10,14 +10,14 @@ defmodule MicosUi.Qcl do
   end
 
   def init(_status) do
+    Endpoint.subscribe("qcl")
     {:ok, _ } = Reader.start_link([])
     Reader.register(self())
-    Endpoint.subscribe("qcl")
     {:ok, []}
   end
 
   def handle_info(result, state) do
-    Endpoint.broadcast_from(self(), "qcl", "data", {:qcl, result})
+    Endpoint.broadcast_from(self(), "qcl", "data", {qcl:, result})
     {:noreply, state}
   end
 end
