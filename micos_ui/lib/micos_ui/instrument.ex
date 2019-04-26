@@ -58,7 +58,7 @@ defmodule MicosUi.Instrument do
     {:noreply, state}
   end
 
-  def handle_info({:qcl, result}, %{sampling: true, data: data} = state) do
+  def handle_info(%{qcl: result}, %{sampling: true, data: data} = state) do
     datum = create_datum(state[:qcl], result)
     state = Map.put(state, :data, [datum | data])
     Endpoint.broadcast_from(self(), "data", "new", datum)

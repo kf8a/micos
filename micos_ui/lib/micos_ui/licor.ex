@@ -18,7 +18,6 @@ defmodule MicosUi.Licor do
   end
 
   def handle_info(result, state) do
-    Logger.info "licor"
     Logger.info inspect result
     Endpoint.broadcast_from(self(), "licor", "data", %{licor: result})
     {:noreply, state}
