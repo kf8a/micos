@@ -3,15 +3,14 @@ defmodule MicosUi.Licor do
   use GenServer
 
   alias MicosUiWeb.Endpoint
-  alias Licor.Reader
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init(_status) do
-    Reader.start_link([])
-    Reader.register(self())
+    {:ok, _ } = Licor.Reader.start_link([])
+    Licor.Reader.register(self())
     Endpoint.subscribe("licor")
     {:ok, []}
   end

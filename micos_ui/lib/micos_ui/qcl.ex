@@ -10,7 +10,7 @@ defmodule MicosUi.Qcl do
   end
 
   def init(_status) do
-    Reader.start_link([])
+    {:ok, _ } = Reader.start_link([])
     Reader.register(self())
     Endpoint.subscribe("qcl")
     {:ok, []}
