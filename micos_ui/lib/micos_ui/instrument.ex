@@ -56,7 +56,7 @@ defmodule MicosUi.Instrument do
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: result, topic: "qcl"}, %{sampling: true, data: data} = state) do
     Logger.info "qcl: #{inspect(result)}"
-    datum = create_datum(state[:qcl], result)
+    datum = create_datum(state[:licor], result)
     state = Map.put(state, :data, [datum | data])
     Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
@@ -84,6 +84,6 @@ defmodule MicosUi.Instrument do
   defp create_datum(qcl, licor) do
     IO.inspect qcl
     IO.inspect licor
-    []
+    %{qcl: qcl, licor: licor}
   end
 end
