@@ -47,16 +47,13 @@ defmodule MicosUi.Instrument do
     {:noreply, state}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: result, topic: "licor"}, %{sampling: true, data: _} = state) do
-    Logger.info "licor: #{inspect(result)}"
-
-    state = Map.put(state, :licor, result)
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: licor, topic: "licor"}, %{sampling: true, data: _} = state) do
+    state = Map.put(state, :licor, licor)
     {:noreply, state}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: result, topic: "qcl"}, %{sampling: true, data: data} = state) do
-    Logger.info "qcl: #{inspect(result)}"
-    datum = create_datum(state[:licor], result)
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: qcl, topic: "qcl"}, %{sampling: true, data: data} = state) do
+    datum = %{qcl: qcl, licor: state[:licor]}
     state = Map.put(state, :data, [datum | data])
     Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
@@ -81,9 +78,4 @@ defmodule MicosUi.Instrument do
     Endpoint.unsubscribe("qcl")
   end
 
-  defp create_datum(qcl, licor) do
-    IO.inspect qcl
-    IO.inspect licor
-    %{qcl: qcl, licor: licor}
-  end
 end
