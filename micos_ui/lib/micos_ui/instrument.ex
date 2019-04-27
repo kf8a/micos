@@ -53,7 +53,7 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: qcl, topic: "qcl"}, %{sampling: true, data: data} = state) do
-    datum = %{qcl: qcl, licor: state[:licor]}
+    datum = combined_datum(qcl, state[:licor])
     state = Map.put(state, :data, [datum | data])
     Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
@@ -78,4 +78,7 @@ defmodule MicosUi.Instrument do
     Endpoint.unsubscribe("qcl")
   end
 
+  def combined_datum(qcl, licor) do
+    %{datetime: qcl[:datetime], ch4: qcl[:ch4_dry_ppm], n2o: qcl[:n2o_dry_ppm], co2: licor[:co2]}
+  end
 end
