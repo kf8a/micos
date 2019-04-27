@@ -41,7 +41,6 @@ defmodule MicosUi.Instrument do
   def handle_cast(:start, state) do
     subscribe()
     Endpoint.broadcast_from(self(), "sampling", "start", DateTime.utc_now)
-    Process.send_after(self(), :tick, 1_000)
     state = Map.put(state, :sampling, true)
             |> Map.put(:data, [])
     {:noreply, state}
@@ -79,6 +78,8 @@ defmodule MicosUi.Instrument do
   end
 
   def combined_datum(qcl, licor) do
+    IO.inspect qcl
+    IO.inspect licor
     %{datetime: qcl[:datetime], ch4: qcl[:ch4_dry_ppm], n2o: qcl[:n2o_dry_ppm], co2: licor[:co2]}
   end
 end
