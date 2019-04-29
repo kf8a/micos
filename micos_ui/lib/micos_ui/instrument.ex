@@ -5,6 +5,8 @@ defmodule MicosUi.Instrument do
 
   require Logger
 
+  @debug true
+
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{sampling: false, data: [] }, name: MicosUi.Instrument)
   end
@@ -43,11 +45,28 @@ defmodule MicosUi.Instrument do
     Endpoint.broadcast_from(self(), "sampling", "start", DateTime.utc_now)
     state = Map.put(state, :sampling, true)
             |> Map.put(:data, [])
+    if @debug do
+      Process.send_after(self(), :tick, 1_000)
+    end
     {:noreply, state}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: licor, topic: "licor"}, %{sampling: true, data: _} = state) do
     state = Map.put(state, :licor, licor)
+    {:noreply, state}
+  end
+
+  def handle_info(:tick, %{sampling: true, data: data} = state) do
+    if @debug do
+      Process.send_after(self(), :tick, 1_000)
+    end
+    datum = %{datetime: DateTime.utc_now(), ch4: :rand.uniform , n2o: :rand.uniform , co2: :rand.uniform}
+    state = Map.put(state, :data, [datum | data])
+    Endpoint.broadcast_from(self(), "data", "new", datum)
+    {:noreply, state}
+  end
+
+  def handle_info(:tick, state) do
     {:noreply, state}
   end
 
