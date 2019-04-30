@@ -8,13 +8,28 @@
 
   <div>
     <%= @datetime%>
+    <table>
+    <tr>
+    <th></th>
+    <th>Flux></th>
+    <th>R2</th>
+    </tr>
+    <tr>
+    <td>N2O</td>
+    <td> <%= @n2o_flux %></td>
+    <td><%= @n2o_r2 %></td>
+    </tr>
+    <tr>
+    <td>CO2</td>
+    <td> <%= @co2_flux %></td>
+    <td><%= @co2_r2 %></td>
+    </tr>
+    <tr>
+    <td>CH4</td>
+    <td> <%= @ch4_flux %></td>
+    <td><%= @ch4_r2 %></td>
+    </tr>
+    </table>
   </div>
 
-  <h2>Data</h2>
-  <div>
-    <ul>
-    <%= for key <- @data do %>
-    <li><%= inspect(key) %></li>
-  <% end %>
-    </ul>
 </div>

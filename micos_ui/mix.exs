@@ -19,7 +19,7 @@ defmodule MicosUi.MixProject do
   def application do
     [
       mod: {MicosUi.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :numerix, :gen_stage, :flow]
     ]
   end
 
@@ -41,6 +41,7 @@ defmodule MicosUi.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:numerix, "~> 0.5"},
       {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"}
     ]
   end

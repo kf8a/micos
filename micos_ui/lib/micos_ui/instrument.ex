@@ -2,6 +2,7 @@ defmodule MicosUi.Instrument do
   use GenServer
 
   alias MicosUiWeb.Endpoint
+  alias MicosUi.Fitter
 
   require Logger
 
@@ -42,9 +43,11 @@ defmodule MicosUi.Instrument do
 
   def handle_cast(:start, state) do
     subscribe()
-    Endpoint.broadcast_from(self(), "sampling", "start", DateTime.utc_now)
+    now = DateTime.utc_now
+    Endpoint.broadcast_from(self(), "sampling", "start", now)
     state = Map.put(state, :sampling, true)
             |> Map.put(:data, [])
+            |> Map.put(:sample_start_time, now)
     if @debug do
       Process.send_after(self(), :tick, 1_000)
     end
@@ -61,8 +64,16 @@ defmodule MicosUi.Instrument do
       Process.send_after(self(), :tick, 1_000)
     end
     datum = %{datetime: DateTime.utc_now(), ch4: :rand.uniform , n2o: :rand.uniform , co2: :rand.uniform}
-    state = Map.put(state, :data, [datum | data])
+    data =  [datum | data]
+    n2o_flux = Fitter.n2o_flux(data, state[:sample_start_time])
+    co2_flux = Fitter.co2_flux(data, state[:sample_start_time])
+    ch4_flux = Fitter.ch4_flux(data, state[:sample_start_time])
+    state = Map.put(state, :data, data)
+            |> Map.put(:n2o_flux, n2o_flux)
+            |> Map.put(:co2_flux, co2_flux)
+            |> Map.put(:ch4_flux, ch4_flux)
     Endpoint.broadcast_from(self(), "data", "new", datum)
+    Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
     {:noreply, state}
   end
 
@@ -72,8 +83,17 @@ defmodule MicosUi.Instrument do
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: qcl, topic: "qcl"}, %{sampling: true, data: data} = state) do
     datum = combined_datum(qcl[:qcl], state[:licor][:licor])
-    state = Map.put(state, :data, [datum | data])
+    data =  [datum | data]
+    n2o_flux = Fitter.n2o_flux(data, state[:sample_start_time])
+    co2_flux = Fitter.co2_flux(data, state[:sample_start_time])
+    ch4_flux = Fitter.ch4_flux(data, state[:sample_start_time])
+    state = Map.put(state, :data, data)
+            |> Map.put(:n2o_flux, n2o_flux)
+            |> Map.put(:co2_flux, co2_flux)
+            |> Map.put(:ch4_flux, ch4_flux)
+
     Endpoint.broadcast_from(self(), "data", "new", datum)
+    Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
     {:noreply, state}
   end
 
@@ -96,7 +116,9 @@ defmodule MicosUi.Instrument do
     Endpoint.unsubscribe("qcl")
   end
 
+
   def combined_datum(%{datetime: datetime, ch4_ppm_dry: ch4_ppm_dry, n2o_ppm_dry: n2o_ppm_dry}, %{co2: co2}) do
     %{datetime: datetime, ch4: ch4_ppm_dry, n2o: n2o_ppm_dry, co2: co2}
   end
+
 end
