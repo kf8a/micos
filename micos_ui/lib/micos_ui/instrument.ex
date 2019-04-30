@@ -6,7 +6,7 @@ defmodule MicosUi.Instrument do
 
   require Logger
 
-  @debug true
+  @debug false
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{sampling: false, data: [] }, name: MicosUi.Instrument)
