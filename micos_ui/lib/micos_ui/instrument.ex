@@ -82,7 +82,7 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: qcl, topic: "qcl"}, %{sampling: true, data: data} = state) do
-    datum = combined_datum(qcl[:qcl], state[:licor][:licor])
+    datum = %{datetime: DateTime.utc_now(), ch4: :rand.uniform , n2o: :rand.uniform , co2: :rand.uniform}
     data =  [datum | data]
     n2o_flux = Fitter.n2o_flux(data, state[:sample_start_time])
     co2_flux = Fitter.co2_flux(data, state[:sample_start_time])
