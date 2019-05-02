@@ -1,13 +1,27 @@
 <div class="">
- <%= f = form_for @changeset, "#", [phx_change: :validate, phx_submit: :save] %>
+  <%= f = form_for @changeset, "#", [phx_change: :validate, phx_submit: :save] %>
   <%= text_input f, :name %>
- </form>
+  <label>
+    Height 1: <%= number_input f, :height1, min: 0, step: 0.1 %>
+  </label>
+  <label>
+    Height 2: <%= number_input f, :height2, min: 0, step: 0.1 %>
+  </label>
+  <label>
+    Height 3: <%= number_input f, :height3, min: 0, step: 0.1 %>
+  </label>
+  </label>
 
   <%= if @sampling do %>
   <button phx-click="stop">Stop sample</button>
   <% else %>
   <button phx-click="sample">Start sample</button>
   <% end %>
+
+  <%= submit "Cancel", phx_disable_with: "Canceling..." %>
+  <%= submit "Save", phx_disable_with: "Saving..." %>
+  </form>
+
 
   <div>
     <%= @datetime%>

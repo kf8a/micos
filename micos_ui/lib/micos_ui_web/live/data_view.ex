@@ -2,6 +2,8 @@ defmodule MicosUiWeb.DataView do
   use Phoenix.LiveView
 
   alias MicosUiWeb.Endpoint
+  alias MicosUi.Samples
+  alias MicosUi.Samples.Sample
 
   require Logger
 
@@ -15,7 +17,7 @@ defmodule MicosUiWeb.DataView do
     Endpoint.subscribe("data")
     {:ok, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling], n2o_flux: "",
       n2o_r2: "", co2_flux: "", co2_r2: "",
-      ch4_flux: "", ch4_r2: "", plot: status[:plot], changeset: Ecto.Changeset.cast(%MicosUi.Samples.Sample{}, %{}, []) )}
+      ch4_flux: "", ch4_r2: "", plot: status[:plot], changeset: Samples.change_sample(%Sample{}) )}
   end
 
   def handle_event("sample", _value, socket) do
@@ -30,12 +32,10 @@ defmodule MicosUiWeb.DataView do
     {:noreply, assign(socket, datetime: DateTime.utc_now, sampling: false) }
   end
 
-  def handle_event("validate", changeset, socket) do
-    # changeset =
-    #   %MicosUi.Samples.Sample{}
-    #   |> MicosUi.Sample.change_sample(params)
+  def handle_event("validate", params, socket) do
+    changeset = Samples.change_sample(%Sample{})
 
-    changeset = Map.put(changeset, "sample", "T")
+    # changeset = Map.put(changeset, "sample", "T")
     IO.inspect "change: #{inspect changeset}"
 
     {:noreply, assign(socket, changeset: changeset) }
