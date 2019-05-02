@@ -7,6 +7,10 @@
 # General application configuration
 use Mix.Config
 
+config :micos_ui,
+  ecto_repos: [MicosUi.Repo]
+
+
 # Configures the endpoint
 config :micos_ui, MicosUiWeb.Endpoint,
   url: [host: "localhost"],

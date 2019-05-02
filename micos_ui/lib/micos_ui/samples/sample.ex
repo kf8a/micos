@@ -8,6 +8,7 @@ defmodule MicosUi.Samples.Sample do
     field :finished_at, :naive_datetime
     belongs_to :plot, Plot
     field :started_at, :naive_datetime
+    field :name, :string, virtual: true
 
     timestamps()
   end
