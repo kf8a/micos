@@ -1,4 +1,4 @@
-defmodule MicosUi.Sample.Study do
+defmodule MicosUi.Samples.Study do
   use Ecto.Schema
   import Ecto.Changeset
 

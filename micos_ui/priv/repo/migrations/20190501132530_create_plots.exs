@@ -5,7 +5,7 @@ defmodule MicosUi.Repo.Migrations.CreatePlots do
   def change do
     create table(:plots) do
       add :name, :string
-      add :study, references("studies")
+      add :study_id, references("studies")
 
       timestamps()
     end

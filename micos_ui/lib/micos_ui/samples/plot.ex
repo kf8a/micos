@@ -1,8 +1,8 @@
-defmodule MicosUi.Sample.Plot do
+defmodule MicosUi.Samples.Plot do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias MicosUi.Sample.Study
+  alias MicosUi.Samples.Study
 
   schema "plots" do
     field :name, :string

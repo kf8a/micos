@@ -14,10 +14,11 @@ defmodule MicosUiWeb.DataView do
   def mount(_session, socket) do
     status = MicosUi.Instrument.status()
     data = status[:data]
+    plots = Samples.get_plots_for_select()
     Endpoint.subscribe("data")
     {:ok, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling], n2o_flux: "",
       n2o_r2: "", co2_flux: "", co2_r2: "",
-      ch4_flux: "", ch4_r2: "", plot: status[:plot], changeset: Samples.change_sample(%Sample{}) )}
+      ch4_flux: "", ch4_r2: "", plot: status[:plot], changeset: Samples.change_sample(%Sample{}), plots: plots )}
   end
 
   def handle_event("sample", _value, socket) do

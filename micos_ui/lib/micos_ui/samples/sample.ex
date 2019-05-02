@@ -2,7 +2,7 @@ defmodule MicosUi.Samples.Sample do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias MicosUi.Sample.Plot
+  alias MicosUi.Samples.Plot
 
   schema "samples" do
     field :finished_at, :naive_datetime

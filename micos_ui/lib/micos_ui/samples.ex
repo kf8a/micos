@@ -7,6 +7,7 @@ defmodule MicosUi.Samples do
   alias MicosUi.Repo
 
   alias MicosUi.Samples.Sample
+  alias MicosUi.Samples.Plot
 
   @doc """
   Returns the list of samples.
@@ -19,6 +20,16 @@ defmodule MicosUi.Samples do
   """
   def list_samples do
     Repo.all(Sample)
+  end
+
+  def get_plots() do
+    Repo.all(Plot)
+  end
+
+  def get_plots_for_select() do
+    query = from p in MicosUi.Samples.Plot, select: {p.name, p.id}
+    Repo.all(query)
+    # |> Enum.map(fn [name,key] -> %{key: key, option: name} end)
   end
 
   @doc """
@@ -101,4 +112,5 @@ defmodule MicosUi.Samples do
   def change_sample(%Sample{} = sample) do
     Sample.changeset(sample, %{})
   end
+
 end

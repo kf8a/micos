@@ -5,7 +5,7 @@ defmodule MicosUi.Repo.Migrations.CreateSamples do
 
   def change do
     create table(:samples) do
-      add :plot, references("plots")
+      add :plot_id, references("plots")
       add :started_at, :utc_datetime
       add :finished_at, :utc_datetime
 

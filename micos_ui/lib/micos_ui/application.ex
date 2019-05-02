@@ -9,6 +9,7 @@ defmodule MicosUi.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
+      MicosUi.Repo,
       MicosUiWeb.Endpoint,
       # Start instrument
       MicosUi.Licor,
