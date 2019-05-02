@@ -46,11 +46,21 @@ defmodule MicosUiWeb.DataView do
     {:noreply, assign(socket, datetime: DateTime.utc_now, data: data)}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{no2_flux: %{slope: n2o_flux, r2: n2o_r2}, co2_flux: %{slope: co2_flux, r2: co2_r2}, ch4_flux: %{slope: ch4_flux, r2: ch4_r2}} = _payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
+  def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}} = payload, topic: "data"}, %Phoenix.LiveView.Socket{} = socket) do
+    Logger.info(inspect payload)
+    {:noreply, socket}
+  end
+
+  # def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: %{intercept: _, r2: ch4_r2, slope: ch4_flux}, co2_flux: %{intercept: _, r2: co2_r2, slope: co2_flux}, n2o_flux: %{intercept: _, r2: n2o_r2, slope: n2o_flux}, topic: "data"}} = _event, %Phoenix.LiveView.Socket{} = socket) do
+  def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
+    n2o = payload[:n2o_flux]
+    co2 = payload[:co2_flux]
+    ch4 = payload[:ch4_flux]
+
     {:noreply, assign(socket,
-      datetime: DateTime.utc_now, n2o_flux: n2o_flux,
-      n2o_r2: n2o_r2, co2_flux: co2_flux, co2_r2: co2_r2,
-      ch4_flux: ch4_flux, ch4_r2: ch4_r2)}
+      datetime: DateTime.utc_now, n2o_flux: n2o[:slope],
+      n2o_r2: n2o[:r2], co2_flux: co2[:slope], co2_r2: co2[:r2],
+      ch4_flux: ch4[:slope], ch4_r2: ch4[:r2])}
   end
 
   def handle_info(message, socket) do
