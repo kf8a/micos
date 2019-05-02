@@ -19,6 +19,7 @@ defmodule MicosUiWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    resources "/samples", SampleController
   end
 
   # Other scopes may use custom stacks.

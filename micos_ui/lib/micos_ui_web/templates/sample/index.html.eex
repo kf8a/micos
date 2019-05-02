@@ -1,0 +1,30 @@
+<h1>Listing Samples</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Plot</th>
+      <th>Started at</th>
+      <th>Finished at</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for sample <- @samples do %>
+    <tr>
+      <td><%= sample.plot_id %></td>
+      <td><%= sample.started_at %></td>
+      <td><%= sample.finished_at %></td>
+
+      <td>
+        <%= link "Show", to: Routes.sample_path(@conn, :show, sample) %>
+        <%= link "Edit", to: Routes.sample_path(@conn, :edit, sample) %>
+        <%= link "Delete", to: Routes.sample_path(@conn, :delete, sample), method: :delete, data: [confirm: "Are you sure?"] %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Sample", to: Routes.sample_path(@conn, :new) %></span>

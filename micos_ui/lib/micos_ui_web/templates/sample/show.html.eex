@@ -1,0 +1,23 @@
+<h1>Show Sample</h1>
+
+<ul>
+
+  <li>
+    <strong>Plot:</strong>
+    <%= @sample.plot_id %>
+  </li>
+
+  <li>
+    <strong>Started at:</strong>
+    <%= @sample.started_at %>
+  </li>
+
+  <li>
+    <strong>Finished at:</strong>
+    <%= @sample.finished_at %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.sample_path(@conn, :edit, @sample) %></span>
+<span><%= link "Back", to: Routes.sample_path(@conn, :index) %></span>
