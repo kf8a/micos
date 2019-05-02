@@ -3,10 +3,11 @@ defmodule MicosUi.Instrument do
 
   alias MicosUiWeb.Endpoint
   alias MicosUi.Fitter
+  alias MicosUi.Samples.Sample
 
   require Logger
 
-  @debug false
+  @debug true
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{sampling: false, data: [] }, name: MicosUi.Instrument)
@@ -30,6 +31,14 @@ defmodule MicosUi.Instrument do
     stop()
   end
 
+  def set_sample(%Sample{} = sample) do
+    GenServer.cast(__MODULE__, {:sample, sample})
+  end
+
+  def handle_cast({:sample, sample}, state) do
+    {:noreply, Map.put(state, :sample, sample)}
+  end
+
   def handle_call(:status, _from, state) do
     {:reply, state, state}
   end
@@ -48,9 +57,11 @@ defmodule MicosUi.Instrument do
     state = Map.put(state, :sampling, true)
             |> Map.put(:data, [])
             |> Map.put(:sample_start_time, now)
+
     if @debug do
       Process.send_after(self(), :tick, 1_000)
     end
+
     {:noreply, state}
   end
 
@@ -72,6 +83,7 @@ defmodule MicosUi.Instrument do
             |> Map.put(:n2o_flux, n2o_flux)
             |> Map.put(:co2_flux, co2_flux)
             |> Map.put(:ch4_flux, ch4_flux)
+
     Endpoint.broadcast_from(self(), "data", "new", datum)
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
     {:noreply, state}

@@ -33,10 +33,11 @@ defmodule MicosUiWeb.DataView do
     {:noreply, assign(socket, datetime: DateTime.utc_now, sampling: false) }
   end
 
-  def handle_event("validate", params, socket) do
-    changeset = Samples.change_sample(%Sample{})
+  def handle_event("validate",  %{"sample" => params}, socket) do
 
-    # changeset = Map.put(changeset, "sample", "T")
+    changeset = %Sample{}
+                |> Sample.changeset(params)
+
     IO.inspect "change: #{inspect changeset}"
 
     {:noreply, assign(socket, changeset: changeset) }
@@ -52,7 +53,6 @@ defmodule MicosUiWeb.DataView do
     {:noreply, socket}
   end
 
-  # def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: %{intercept: _, r2: ch4_r2, slope: ch4_flux}, co2_flux: %{intercept: _, r2: co2_r2, slope: co2_flux}, n2o_flux: %{intercept: _, r2: n2o_r2, slope: n2o_flux}, topic: "data"}} = _event, %Phoenix.LiveView.Socket{} = socket) do
   def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
     n2o = payload[:n2o_flux]
     co2 = payload[:co2_flux]

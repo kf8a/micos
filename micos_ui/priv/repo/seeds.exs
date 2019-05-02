@@ -10,8 +10,8 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-MicosUi.Repo.insert!(%MicosUi.Samples.Study{name: "MCSE"})
+study = MicosUi.Repo.insert!(%MicosUi.Samples.Study{name: "MCSE"})
 
 File.stream!("plots.csv")
 |> Enum.map(&String.trim/1)
-|> Enum.map(fn x -> MicosUi.Repo.insert(%MicosUi.Samples.Plot{study_id: 1, name: x}) end )
+|> Enum.map(fn x -> MicosUi.Repo.insert(%MicosUi.Samples.Plot{study_id: study.id, name: x}) end )

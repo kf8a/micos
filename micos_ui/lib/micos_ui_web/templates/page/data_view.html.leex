@@ -14,13 +14,9 @@
   </label>
   </label>
 
-  <%= if @sampling do %>
-  <button phx-click="stop">Stop sample</button>
-  <% else %>
-  <button phx-click="sample">Start sample</button>
-  <% end %>
+  <button phx-click="sample", phx_disable_with: "sampling..", <%= if @sampling do %> disabled <% end %>  >Start sample</button>
 
-  <%= submit "Cancel", phx_disable_with: "Canceling..." %>
+  <button phx-click="stop", phx_disable_with: "stopping...", disabled= <%= if !@sampling do %> disabled <% end %>  >Stop sample</button>
   <%= submit "Save", phx_disable_with: "Saving..." %>
   </form>
 

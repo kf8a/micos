@@ -5,10 +5,9 @@ defmodule MicosUi.Samples.Sample do
   alias MicosUi.Samples.Plot
 
   schema "samples" do
-    field :finished_at, :naive_datetime
+    field :finished_at, :naive_datetime_usec
     belongs_to :plot, Plot
-    field :started_at, :naive_datetime
-    field :name, :string, virtual: true
+    field :started_at, :naive_datetime_usec
 
     timestamps()
   end
