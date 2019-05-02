@@ -46,6 +46,7 @@ defmodule Qcl.Reader do
   end
 
   def handle_info({:parser, result}, state) do
+    Task.start(Qcl.Logger, :save, [result])
     Logger.debug inspect(result)
     broadcast(result, state[:listeners])
     {:noreply, state}
