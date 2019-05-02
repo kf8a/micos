@@ -13,12 +13,18 @@ defmodule MicosUiWeb.DataView do
 
   def mount(_session, socket) do
     status = MicosUi.Instrument.status()
+    IO.inspect status
     data = status[:data]
     plots = Samples.get_plots_for_select()
+
+    n2o_flux = status[:n2o_flux]
+    co2_flux = status[:co2_flux]
+    ch4_flux = status[:ch4_flux]
+
     Endpoint.subscribe("data")
-    {:ok, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling], n2o_flux: "",
-      n2o_r2: "", co2_flux: "", co2_r2: "",
-      ch4_flux: "", ch4_r2: "", plot: status[:plot], changeset: Samples.change_sample(%Sample{}), plots: plots )}
+    {:ok, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling],
+      n2o_flux: n2o_flux[:slope], n2o_r2: n2o_flux[:r2], co2_flux: co2_flux[:slope], co2_r2: co2_flux[:r2],
+      ch4_flux: ch4_flux[:slope], ch4_r2: ch4_flux[:r2], changeset: Samples.change_sample(%Sample{}), plots: plots )}
   end
 
   def handle_event("sample", _value, socket) do
@@ -38,7 +44,10 @@ defmodule MicosUiWeb.DataView do
     changeset = %Sample{}
                 |> Sample.changeset(params)
 
-    IO.inspect "change: #{inspect changeset}"
+    if changeset.valid? do
+      {:ok, sample} = Samples.create_sample(changeset.changes)
+      MicosUi.Instrument.set_sample(sample)
+    end
 
     {:noreply, assign(socket, changeset: changeset) }
   end

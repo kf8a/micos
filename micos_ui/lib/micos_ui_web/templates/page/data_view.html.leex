@@ -12,12 +12,12 @@
   <label>
     Height 3: <%= number_input f, :height3, min: 0, step: 0.1 %>
   </label>
-  </label>
 
-  <button phx-click="sample", phx_disable_with: "sampling..", <%= if @sampling do %> disabled <% end %>  >Start sample</button>
+  <button phx-click="sample", phx_disable_with: "sampling..", <%= if !@changeset.valid? || @sampling do %> disabled <% end %>  >Start sample</button>
 
-  <button phx-click="stop", phx_disable_with: "stopping...", disabled= <%= if !@sampling do %> disabled <% end %>  >Stop sample</button>
-  <%= submit "Save", phx_disable_with: "Saving..." %>
+  <button phx-click="stop", phx_disable_with: "stopping...", <%= if !@changeset.valid? || !@sampling do %> disabled <% end %>  >Stop sample</button>
+
+  <%= submit "Save", phx_disable_with: "Saving...", disabled: !@changeset.valid?  %>
   </form>
 
 
