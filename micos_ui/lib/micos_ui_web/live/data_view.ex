@@ -69,7 +69,10 @@ defmodule MicosUiWeb.DataView do
   end
 
   def handle_event("next", _value, socket) do
-    {:noreply, assign(socket, changeset: Samples.change_sample(%Sample{})) }
+    MicosUi.Instrument.stop()
+    status = MicosUi.Instrument.status()
+    {:noreply, assign(socket, sampling: status[:sampling],
+                              changeset: Samples.change_sample(%Sample{})) }
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
