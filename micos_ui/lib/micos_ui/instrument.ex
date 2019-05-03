@@ -36,6 +36,16 @@ defmodule MicosUi.Instrument do
     GenServer.cast(__MODULE__, {:sample, sample})
   end
 
+  def save_sample(%Sample{} = _sample, %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}}) do
+  end
+
+  def save_sample(%Sample{} = sample, %{ch4_flux: ch4_flux, co2_flux: co2_flux, n2o_flux: n2o_flux}) do
+    Logger.info "saving sample #{inspect sample}"
+    {:ok, _} = Samples.update_sample(sample, %{n2o_slope: n2o_flux[:slope], n2o_r2: n2o_flux[:r2],
+                                               co2_slope: co2_flux[:slope], co2_r2: co2_flux[:r2],
+                                               ch4_slope: ch4_flux[:slope], ch4_r2: ch4_flux[:r2]})
+  end
+
   def handle_cast({:sample, sample}, state) do
     {:noreply, Map.put(state, :sample, sample)}
   end
@@ -43,12 +53,11 @@ defmodule MicosUi.Instrument do
   def handle_cast(:stop, state) do
     Endpoint.broadcast_from(self(), "sampling", "stop", DateTime.utc_now)
     unsubscribe()
-    {:ok, sample} = Samples.update_sample(state[:sample], %{n2o_slope: state[:n2o_flux][:slope], n2o_r2: state[:n2o_flux][:r2],
-                                                            co2_slope: state[:co2_flux][:slope], co2_r2: state[:co2_flux][:r2],
-                                                            ch4_slope: state[:ch4_flux][:slope], ch4_r2: state[:ch4_flux][:r2]})
+
+    save_sample(state[:sample], state)
+
     state = state
             |> Map.put(:sampling, false)
-            |> Map.put(:sample, sample)
     {:noreply, state}
   end
 
