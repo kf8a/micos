@@ -5,8 +5,8 @@ defmodule MicosUi.Samples.Sample do
   alias MicosUi.Samples.Plot
 
   schema "samples" do
-    field :finished_at, :naive_datetime_usec
-    field :started_at, :naive_datetime_usec
+    field :finished_at, :utc_datetime_usec
+    field :started_at, :utc_datetime_usec
     field :height1, :float
     field :height2, :float
     field :height3, :float

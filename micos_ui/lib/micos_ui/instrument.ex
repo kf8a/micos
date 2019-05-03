@@ -83,14 +83,14 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(:tick, %{sampling: true, data: data} = state) do
-    if @debug do
-      Process.send_after(self(), :tick, 1_000)
-    end
     datum = %{datetime: DateTime.utc_now(), ch4: :rand.uniform , n2o: :rand.uniform , co2: :rand.uniform}
     data =  [datum | data]
-    n2o_flux = Fitter.n2o_flux(data, state[:sample_start_time])
-    co2_flux = Fitter.co2_flux(data, state[:sample_start_time])
-    ch4_flux = Fitter.ch4_flux(data, state[:sample_start_time])
+
+    start_time = state[:sample].started_at
+    n2o_flux = Fitter.n2o_flux(data, start_time)
+    co2_flux = Fitter.co2_flux(data, start_time)
+    ch4_flux = Fitter.ch4_flux(data, start_time)
+
     state = Map.put(state, :data, data)
             |> Map.put(:n2o_flux, n2o_flux)
             |> Map.put(:co2_flux, co2_flux)
@@ -98,6 +98,9 @@ defmodule MicosUi.Instrument do
 
     Endpoint.broadcast_from(self(), "data", "new", datum)
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
+
+    Process.send_after(self(), :tick, 1_000)
+
     {:noreply, state}
   end
 
