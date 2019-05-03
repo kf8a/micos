@@ -26,14 +26,17 @@ defmodule MicosUiWeb.DataView do
     {:ok, assign(socket, Map.merge(live, fluxes))}
   end
 
-  def flux_to_map(status) do
-    n2o_flux = status[:n2o_flux]
-    co2_flux = status[:co2_flux]
-    ch4_flux = status[:ch4_flux]
+  def flux_to_map( %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
+                     co2_flux: %{slope: co2_flux, r2: co2_r2},
+                     n2o_flux: %{slope: n2o_flux, r2: n2o_r2}}) do
+    %{n2o_flux: n2o_flux, n2o_r2: n2o_r2,
+      co2_flux: co2_flux, co2_r2: co2_r2,
+      ch4_flux: ch4_flux, ch4_r2: ch4_r2}
+  end
 
-    %{n2o_flux: n2o_flux[:slope], n2o_r2: n2o_flux[:r2],
-      co2_flux: co2_flux[:slope], co2_r2: co2_flux[:r2],
-      ch4_flux: ch4_flux[:slope], ch4_r2: ch4_flux[:r2]}
+  def flux_to_map(msg) do
+    Logger.error "flux_to_map called with: #{inspect(msg)}"
+    %{}
   end
 
   def round3(fluxes) do
