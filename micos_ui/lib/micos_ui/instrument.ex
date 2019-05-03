@@ -77,7 +77,8 @@ defmodule MicosUi.Instrument do
   end
 
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: licor, topic: "licor"}, %{sampling: true, data: _} = state) do
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{licor: licor}=_payload, topic: "licor"}, %{sampling: true, data: _} = state) do
+    IO.inspect licor
     state = Map.put(state, :licor, licor)
     {:noreply, state}
   end
@@ -108,11 +109,11 @@ defmodule MicosUi.Instrument do
     {:noreply, state}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: qcl, topic: "qcl"}, %{sampling: true, data: data} = state) do
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: true, data: data} = state) do
     # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
     #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
     #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
-    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppm_dry], co2: qcl[:co2_ppm_dry]}
+    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppm_dry], co2: state[:licor][:co2]}
     data =  [datum | data]
 
     start_time = state[:sample].started_at
@@ -147,11 +148,6 @@ defmodule MicosUi.Instrument do
     Endpoint.unsubscribe("sampling")
     Endpoint.unsubscribe("licor")
     Endpoint.unsubscribe("qcl")
-  end
-
-
-  def combined_datum(%{datetime: datetime, ch4_ppm_dry: ch4_ppm_dry, n2o_ppm_dry: n2o_ppm_dry}, %{co2: co2}) do
-    %{datetime: datetime, ch4: ch4_ppm_dry, n2o: n2o_ppm_dry, co2: co2}
   end
 
 end
