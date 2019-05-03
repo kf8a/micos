@@ -36,14 +36,18 @@ defmodule MicosUi.Instrument do
     GenServer.cast(__MODULE__, {:sample, sample})
   end
 
-  def save_sample(%Sample{} = _sample, %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}}) do
+
+  def save_sample(%Sample{} = sample, %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
+                                        co2_flux: %{slope: co2_flux, r2: co2_r2},
+                                        n2o_flux: %{slope: n2o_flux, r2: n2o_r2}}) do
+    Logger.info "saving sample #{inspect sample}"
+    {:ok, _} = Samples.update_sample(sample, %{n2o_slope: n2o_flux, n2o_r2: n2o_r2,
+                                               co2_slope: co2_flux, co2_r2: co2_r2,
+                                               ch4_slope: ch4_flux, ch4_r2: ch4_r2})
   end
 
-  def save_sample(%Sample{} = sample, %{ch4_flux: ch4_flux, co2_flux: co2_flux, n2o_flux: n2o_flux}) do
-    Logger.info "saving sample #{inspect sample}"
-    {:ok, _} = Samples.update_sample(sample, %{n2o_slope: n2o_flux[:slope], n2o_r2: n2o_flux[:r2],
-                                               co2_slope: co2_flux[:slope], co2_r2: co2_flux[:r2],
-                                               ch4_slope: ch4_flux[:slope], ch4_r2: ch4_flux[:r2]})
+  # If save_sample is called with anything else it will do nothing
+  def save_sample(%Sample{} = _, _ ) do
   end
 
   def handle_cast({:sample, sample}, state) do
