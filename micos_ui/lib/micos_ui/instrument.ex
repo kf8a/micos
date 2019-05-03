@@ -114,9 +114,12 @@ defmodule MicosUi.Instrument do
     #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
     datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppm_dry], co2: qcl[:co2_ppm_dry]}
     data =  [datum | data]
-    n2o_flux = Fitter.n2o_flux(data, state[:sample_start_time])
-    co2_flux = Fitter.co2_flux(data, state[:sample_start_time])
-    ch4_flux = Fitter.ch4_flux(data, state[:sample_start_time])
+
+    start_time = state[:sample].started_at
+    n2o_flux = Fitter.n2o_flux(data, start_time)
+    co2_flux = Fitter.co2_flux(data, start_time)
+    ch4_flux = Fitter.ch4_flux(data, start_time)
+
     state = Map.put(state, :data, data)
             |> Map.put(:n2o_flux, n2o_flux)
             |> Map.put(:co2_flux, co2_flux)
