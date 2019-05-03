@@ -64,6 +64,9 @@ defmodule MicosUi.Instrument do
             |> Map.put(:data, [])
             |> Map.put(:sample_start_time, now)
             |> Map.put(:sample, sample)
+            |> Map.put(:n2o_flux, %{})
+            |> Map.put(:co2_flux, %{})
+            |> Map.put(:ch4_flux, %{})
 
     if @debug do
       Process.send_after(self(), :tick, 1_000)

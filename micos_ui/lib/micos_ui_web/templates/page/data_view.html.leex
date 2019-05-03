@@ -1,23 +1,26 @@
 <div class="">
-  <%= f = form_for @changeset, "#", [phx_change: :validate, phx_submit: :save] %>
+  <%= f = form_for @changeset, "#", [phx_change: :validate] %>
   <label>
     Plot: <%= select f, :plot_id, @plots %>
   </label>
   <label>
-    Height 1: <%= number_input f, :height1, min: 0, step: 0.1 %>
+    Height: <%= number_input f, :height1, min: 0, step: 0.5, size: 20 %>
+    <%= number_input f, :height2, min: 0, step: 0.5, size: 20 %>
+    <%= number_input f, :height3, min: 0, step: 0.5, size: 20 %>
   </label>
   <label>
-    Height 2: <%= number_input f, :height2, min: 0, step: 0.1 %>
+    Soil Temperature: <%= number_input f, :soil_temperature, step: 0.1 %>
   </label>
   <label>
-    Height 3: <%= number_input f, :height3, min: 0, step: 0.1 %>
+    Air Temperature: <%= number_input f, :air_temperature, step: 0.1 %>
   </label>
 
   <button phx-click="sample", phx_disable_with: "sampling..", <%= if !@changeset.valid? || @sampling do %> disabled <% end %>  >Start sample</button>
 
   <button phx-click="stop", phx_disable_with: "stopping...", <%= if !@changeset.valid? || !@sampling do %> disabled <% end %>  >Stop sample</button>
+  <!-- TODO: only enable this if the sample is complete ie it has the finished_at set  -->
+  <button phx-click="next", phx_disable_with: "next sample...", <%= if !@changeset.valid? do %> disabled <% end %>  > Next sample</button>
 
-  <%= submit "Save", phx_disable_with: "Saving...", disabled: !@changeset.valid?  %>
   </form>
 
 

@@ -13,7 +13,6 @@ defmodule MicosUiWeb.DataView do
 
   def mount(_session, socket) do
     status = MicosUi.Instrument.status()
-    IO.inspect status
     data = status[:data]
     plots = Samples.get_plots_for_select()
 
@@ -24,19 +23,32 @@ defmodule MicosUiWeb.DataView do
     Endpoint.subscribe("data")
     {:ok, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling],
       n2o_flux: n2o_flux[:slope], n2o_r2: n2o_flux[:r2], co2_flux: co2_flux[:slope], co2_r2: co2_flux[:r2],
-      ch4_flux: ch4_flux[:slope], ch4_r2: ch4_flux[:r2], changeset: Samples.change_sample(%Sample{}), plots: plots )}
+      ch4_flux: ch4_flux[:slope], ch4_r2: ch4_flux[:r2],
+      changeset: Samples.change_sample(%Sample{}), plots: plots )}
   end
 
   def handle_event("sample", _value, socket) do
     MicosUi.Instrument.start()
     status = MicosUi.Instrument.status()
     data = status[:data]
-    {:noreply, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling])}
+
+    n2o_flux = status[:n2o_flux]
+    co2_flux = status[:co2_flux]
+    ch4_flux = status[:ch4_flux]
+
+    {:noreply, assign(socket, datetime: DateTime.utc_now, data: data, sampling: status[:sampling],
+      n2o_flux: n2o_flux[:slope], n2o_r2: n2o_flux[:r2], co2_flux: co2_flux[:slope], co2_r2: co2_flux[:r2],
+      ch4_flux: ch4_flux[:slope], ch4_r2: ch4_flux[:r2])}
   end
 
   def handle_event("stop", _value, socket) do
     MicosUi.Instrument.stop()
-    {:noreply, assign(socket, datetime: DateTime.utc_now, sampling: false) }
+    status = MicosUi.Instrument.status()
+    {:noreply, assign(socket, datetime: DateTime.utc_now, sampling: status[:sampling]) }
+  end
+
+  def handle_event("next", _value, socket) do
+    {:noreply, assign(socket, datetime: DateTime.utc_now, changeset: Samples.change_sample(%Sample{})) }
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
