@@ -30,6 +30,6 @@ defmodule MicosUi.Samples.Sample do
       :n2o_slope, :n2o_r2, :co2_slope, :co2_r2, :ch4_slope, :ch4_r2,
       :air_temperature, :soil_temperature,
       :started_at, :finished_at ])
-    |> validate_required([:plot_id, :height1, :height2, :height3, :soil_temperature])
+    |> validate_required([:plot_id, :height1, :height2, :height3])
   end
 end
