@@ -16,7 +16,7 @@ defmodule MicosUiWeb.DataView do
     data = status[:data]
     plots = Samples.get_plots_for_select()
 
-    fluxes = round3(flux_to_map(status))
+    fluxes = round5(flux_to_map(status))
 
     Endpoint.subscribe("data")
 
@@ -42,17 +42,17 @@ defmodule MicosUiWeb.DataView do
     %{}
   end
 
-  def round3(fluxes) do
-    Enum.map(fluxes, fn(x) -> round_to_3(x) end)
+  def round5(fluxes) do
+    Enum.map(fluxes, fn(x) -> round_to_5(x) end)
     |> Enum.into(%{})
   end
 
-  def round_to_3({key, x}) do
+  def round_to_5({key, x}) do
     case x do
       nil ->
         {key, x}
       _ ->
-        {key, Float.round(x,3)}
+        {key, Float.round(x,5)}
     end
   end
 
@@ -62,7 +62,7 @@ defmodule MicosUiWeb.DataView do
     data = status[:data]
 
     live = %{data: data, sampling: status[:sampling]}
-    {:noreply, assign(socket, Map.merge(live, round3(flux_to_map(status)))) }
+    {:noreply, assign(socket, Map.merge(live, round5(flux_to_map(status)))) }
   end
 
   def handle_event("stop", _value, socket) do
@@ -113,7 +113,7 @@ defmodule MicosUiWeb.DataView do
               co2_flux: co2[:slope], co2_r2: co2[:r2],
               ch4_flux: ch4[:slope], ch4_r2: ch4[:r2]}
 
-    {:noreply, assign(socket, round3(fluxes)) }
+    {:noreply, assign(socket, round5(fluxes)) }
   end
 
   def handle_info(message, socket) do
