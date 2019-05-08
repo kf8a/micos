@@ -22,6 +22,7 @@ defmodule MicosUiWeb.DataView do
 
     live = %{data: data, sampling: status[:sampling],
       changeset: Samples.change_sample(%Sample{}), plots: plots,
+      datum: '',
       n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
       ch4_flux: '', ch4_r2: ''}
 
@@ -96,7 +97,7 @@ defmodule MicosUiWeb.DataView do
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{assigns: assigns} = socket) do
     data = assigns[:data] ++ [payload]
-    {:noreply, assign(socket, data: data)}
+    {:noreply, assign(socket, data: data, datum: payload)}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}} = payload, topic: "data"}, %Phoenix.LiveView.Socket{} = socket) do
