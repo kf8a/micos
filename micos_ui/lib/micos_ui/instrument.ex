@@ -130,7 +130,7 @@ defmodule MicosUi.Instrument do
     # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
     #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
     #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
-    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppm_dry], co2: state[:licor][:co2]}
+    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
     data =  [datum | data]
 
     start_time = state[:sample].started_at

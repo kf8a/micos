@@ -8,7 +8,8 @@ defmodule Qcl.Parser do
     [data] = CSV.parse_string(raw_data, skip_headers: false)
     %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
       ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
-      n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
+      n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data),
+      n2o_ppb_dry: n2o_ppm_dry(data)*1000}
   end
 
   defp instrument_datetime(data) do
