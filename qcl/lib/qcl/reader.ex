@@ -5,16 +5,15 @@ defmodule Qcl.Reader do
 
   alias Qcl.Parser
 
-  @port Application.get_env(:qcl, :port)
-
   def start_link(_) do
     GenServer.start_link(__MODULE__, @port, name: __MODULE__)
   end
 
-  def init(port) do
+  def init(_) do
+    port = System.get_env("QCL_PORT")
     {:ok, pid} = Circuits.UART.start_link
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
-    {:ok, %{uart: pid, listeners: []}}
+    {:ok, %{uart: pid, port: port, listeners: []}}
   end
 
   def register(client_pid) do
@@ -40,8 +39,10 @@ defmodule Qcl.Reader do
     {:reply, result, state}
   end
 
-  def handle_info({:circuits_uart, @port, data}, state) do
-    Task.start(__MODULE__, :process_data, [data, self()])
+  def handle_info({:circuits_uart, port, data}, state) do
+    if port == state[:port] do
+      Task.start(__MODULE__, :process_data, [data, self()])
+    end
     {:noreply, state}
   end
 

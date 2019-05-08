@@ -5,17 +5,16 @@ defmodule Licor.Reader do
 
   alias Licor.Parser
 
-  @port Application.get_env(:licor, :port)
-
   def start_link(_) do
-    GenServer.start_link(__MODULE__, @port, name: __MODULE__)
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
-  def init(port) do
+  def init(_) do
+    port = System.get_env("LICOR_PORT")
     {:ok, pid} = Circuits.UART.start_link
 
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
-    {:ok, %{uart: pid, listeners: []}}
+    {:ok, %{uart: pid, port: port, listeners: []}}
   end
 
   def register(client_pid) do
@@ -35,14 +34,22 @@ defmodule Licor.Reader do
     Enum.map(listeners, fn x -> Process.send(x, result, []) end)
   end
 
+  def port, do: GenServer.call(__MODULE__, :port)
+
   def current_value, do: GenServer.call(__MODULE__, :current_value)
 
   def handle_call(:current_value, _from, %{result: result} = state) do
     {:reply, result, state}
   end
 
-  def handle_info({:circuits_uart, @port, data}, state) do
-    Task.start(__MODULE__, :process_data, [data, self()])
+  def handle_call(:port, _from, %{port: port} = state) do
+    {:reply, port, state}
+  end
+
+  def handle_info({:circuits_uart, port, data}, state) do
+    if port == state[:port] do
+      Task.start(__MODULE__, :process_data, [data, self()])
+    end
     {:noreply, state}
   end
 
