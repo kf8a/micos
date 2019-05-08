@@ -66,6 +66,12 @@ defmodule MicosUi.Samples do
     |> Repo.insert()
   end
 
+  def insert_or_update(%Sample{} = sample, attrs \\ %{}) do
+    sample
+    |> Sample.changeset(attrs)
+    |> Repo.insert_or_update
+  end
+
   @doc """
   Updates a sample.
 

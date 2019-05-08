@@ -79,14 +79,17 @@ defmodule MicosUiWeb.DataView do
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
-
-    changeset = %Sample{}
+    status = MicosUi.Instrument.status
+    IO.inspect status[:sample]
+    sample = status[:sample]
+    changeset = sample
                 |> Sample.changeset(params)
 
     if changeset.valid? do
-      {:ok, sample} = Samples.create_sample(changeset.changes)
+      {:ok, sample} = Samples.insert_or_update(sample, params)
       MicosUi.Instrument.set_sample(sample)
     end
+    IO.inspect status[:sample]
 
     {:noreply, assign(socket, changeset: changeset) }
   end

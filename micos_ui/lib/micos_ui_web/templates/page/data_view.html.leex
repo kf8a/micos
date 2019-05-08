@@ -23,6 +23,9 @@
 
   </form>
 
+  <div>
+    <%= if length(@data) > 1 do inspect hd(@data) else 0 end %>
+  </div>
 
   <div>
     <table>

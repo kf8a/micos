@@ -11,7 +11,7 @@ defmodule MicosUi.Instrument do
   @debug true
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{sampling: false, data: [] }, name: MicosUi.Instrument)
+    GenServer.start_link(__MODULE__, %{sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Instrument)
   end
 
   def init(state) do
@@ -62,6 +62,7 @@ defmodule MicosUi.Instrument do
 
     state = state
             |> Map.put(:sampling, false)
+            |> Map.put(:sample, %Sample{})
     {:noreply, state}
   end
 
