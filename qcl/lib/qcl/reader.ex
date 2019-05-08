@@ -6,7 +6,7 @@ defmodule Qcl.Reader do
   alias Qcl.Parser
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, @port, name: __MODULE__)
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
   def init(_) do
