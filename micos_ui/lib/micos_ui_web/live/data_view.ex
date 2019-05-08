@@ -21,7 +21,10 @@ defmodule MicosUiWeb.DataView do
     Endpoint.subscribe("data")
 
     live = %{data: data, sampling: status[:sampling],
-            changeset: Samples.change_sample(%Sample{}), plots: plots}
+      changeset: Samples.change_sample(%Sample{}), plots: plots,
+      n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
+      ch4_flux: '', ch4_r2: ''}
+
 
     {:ok, assign(socket, Map.merge(live, fluxes))}
   end
