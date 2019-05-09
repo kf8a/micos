@@ -8,7 +8,7 @@ defmodule MicosUi.Instrument do
 
   require Logger
 
-  @debug true
+  @debug = Application.get_env(:micos_ui, :debug)
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Instrument)
@@ -146,6 +146,16 @@ defmodule MicosUi.Instrument do
 
     Endpoint.broadcast_from(self(), "data", "new", datum)
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
+    {:noreply, state}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: false, data: data} = state) do
+    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
+    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
+    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
+    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
+
+    Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
