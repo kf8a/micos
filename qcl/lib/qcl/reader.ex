@@ -10,10 +10,17 @@ defmodule Qcl.Reader do
   end
 
   def init(_) do
-    port = System.get_env("QCL_PORT")
     {:ok, pid} = Circuits.UART.start_link
+    port = port()
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid, port: port, listeners: []}}
+  end
+
+  def port() do
+    case port = System.get_env("QCL_PORT") do
+      nil -> "ttyQCL"
+      _ -> port
+    end
   end
 
   def register(client_pid) do

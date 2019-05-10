@@ -3,8 +3,8 @@ defmodule Licor.Logger do
 
   def save(msg) do
     # msg = Map.put(data, :datetime, DateTime.utc_now)
-    save_to_disk(msg)
-    write_to_rabbitmq(msg)
+    Task.start(__MODULE__, :save_to_disk, [msg])
+    Task.start(__MODULE__, :write_to_rabbitmq, [msg])
   end
 
   def save_to_disk(data) do
@@ -28,7 +28,7 @@ defmodule Licor.Logger do
     with {:ok, conn} = open_connection(),
          {:ok, chan} = AMQP.Channel.open(conn)
     do
-      Logger.info "messenger sending #{inspect msg}"
+      Logger.debug "messenger sending #{inspect msg}"
       AMQP.Queue.declare(chan, @queue)
       AMQP.Exchange.declare(chan, @exchange )
       AMQP.Queue.bind(chan, @queue, @exchange)

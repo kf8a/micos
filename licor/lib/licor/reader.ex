@@ -10,11 +10,19 @@ defmodule Licor.Reader do
   end
 
   def init(_) do
-    port = System.get_env("LICOR_PORT")
     {:ok, pid} = Circuits.UART.start_link
-
+    port = get_port()
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid, port: port, listeners: []}}
+  end
+
+  def get_port() do
+    case port = System.get_env("LICOR_PORT") do
+      nil ->
+        "ttyLICOR"
+      _ -> port
+    end
+
   end
 
   def register(client_pid) do

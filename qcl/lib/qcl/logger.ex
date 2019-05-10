@@ -26,7 +26,7 @@ defmodule Qcl.Logger do
     with {:ok, conn} = open_connection(),
          {:ok, chan} = AMQP.Channel.open(conn)
     do
-      Logger.info "messenger sending #{inspect msg}"
+      Logger.debug "messenger sending #{inspect msg}"
       AMQP.Queue.declare(chan, @queue)
       AMQP.Exchange.declare(chan, @exchange )
       AMQP.Queue.bind(chan, @queue, @exchange)
