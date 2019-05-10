@@ -16,7 +16,9 @@ config :micos_ui, MicosUiWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
   root: ".",
-  version: Application.spec(:micos_ui, :vsn)
+  version: Application.spec(:micos_ui, :vsn),
+  check_origin: ["http://192.168.18.153:4000", "http://192.168.120.16:4000"]
+
 
 
 # Do not print debug messages in production
