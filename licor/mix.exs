@@ -24,6 +24,7 @@ defmodule Licor.MixProject do
     [
       {:circuits_uart, "~> 1.3"},
       {:exml, "~> 0.1.1"},
+      {:amqp, "~> 1.2"},
       {:gen_stage, "~> 0.14.1"},
     ]
   end
