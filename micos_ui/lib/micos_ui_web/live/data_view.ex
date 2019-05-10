@@ -13,14 +13,13 @@ defmodule MicosUiWeb.DataView do
 
   def mount(_session, socket) do
     status = MicosUi.Instrument.status()
-    data = status[:data]
     plots = Samples.get_plots_for_select()
 
     fluxes = round5(flux_to_map(status))
 
     Endpoint.subscribe("data")
 
-    live = %{data: data, sampling: status[:sampling],
+    live = %{sampling: status[:sampling],
       changeset: Samples.change_sample(%Sample{}), plots: plots,
       datum: '',
       n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
@@ -59,20 +58,22 @@ defmodule MicosUiWeb.DataView do
 
   def handle_event("sample", _value, socket) do
     MicosUi.Instrument.start()
+    MicosUi.Logger.save(%{event: "start", datetime: DateTime.utc_now})
     status = MicosUi.Instrument.status()
-    data = status[:data]
 
-    live = %{data: data, sampling: status[:sampling]}
+    live = %{sampling: status[:sampling]}
     {:noreply, assign(socket, Map.merge(live, round5(flux_to_map(status)))) }
   end
 
   def handle_event("stop", _value, socket) do
+    MicosUi.Logger.save(%{event: "stop", datetime: DateTime.utc_now})
     MicosUi.Instrument.stop()
-    status = MicosUi.Instrument.status()
-    {:noreply, assign(socket, sampling: status[:sampling]) }
+    #status = MicosUi.Instrument.status()
+    {:noreply, assign(socket, sampling: "false") }
   end
 
   def handle_event("next", _value, socket) do
+    MicosUi.Logger.save(%{event: "next", datetime: DateTime.utc_now})
     MicosUi.Instrument.stop()
     status = MicosUi.Instrument.status()
     {:noreply, assign(socket, sampling: status[:sampling],
@@ -81,7 +82,6 @@ defmodule MicosUiWeb.DataView do
 
   def handle_event("validate",  %{"sample" => params}, socket) do
     status = MicosUi.Instrument.status
-    IO.inspect status[:sample]
     sample = status[:sample]
     changeset = sample
                 |> Sample.changeset(params)
@@ -90,14 +90,12 @@ defmodule MicosUiWeb.DataView do
       {:ok, sample} = Samples.insert_or_update(sample, params)
       MicosUi.Instrument.set_sample(sample)
     end
-    IO.inspect status[:sample]
 
     {:noreply, assign(socket, changeset: changeset) }
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{assigns: assigns} = socket) do
-    data = assigns[:data] ++ [payload]
-    {:noreply, assign(socket, data: data, datum: payload)}
+  def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
+    {:noreply, assign(socket, datum: payload)}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}} = payload, topic: "data"}, %Phoenix.LiveView.Socket{} = socket) do

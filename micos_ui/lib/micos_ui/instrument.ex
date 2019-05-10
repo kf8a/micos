@@ -95,8 +95,49 @@ defmodule MicosUi.Instrument do
 
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{licor: licor}=_payload, topic: "licor"}, %{sampling: true, data: _} = state) do
-    IO.inspect licor
     state = Map.put(state, :licor, licor)
+    {:noreply, state}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", topic: "licor"}, state) do
+    {:noreply, state}
+  end
+
+
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: true, data: data} = state) do
+    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
+    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
+    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
+    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
+    Logger.debug(inspect(datum))
+    data = if datum[:co2] != nil do
+      [datum | data]
+    else
+      data
+    end
+
+    start_time = state[:sample].started_at
+    n2o_flux = Fitter.n2o_flux(data, start_time)
+    co2_flux = Fitter.co2_flux(data, start_time)
+    ch4_flux = Fitter.ch4_flux(data, start_time)
+
+    state = Map.put(state, :data, data)
+            |> Map.put(:n2o_flux, n2o_flux)
+            |> Map.put(:co2_flux, co2_flux)
+            |> Map.put(:ch4_flux, ch4_flux)
+
+    Endpoint.broadcast_from(self(), "data", "new", datum)
+    Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
+    {:noreply, state}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: false} = state) do
+    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
+    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
+    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
+    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
+
+    Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
@@ -123,39 +164,6 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(:tick, state) do
-    {:noreply, state}
-  end
-
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: true, data: data} = state) do
-    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
-    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
-    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
-    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
-    Logger.debug(inspect(datum))
-    data =  [datum | data]
-
-    start_time = state[:sample].started_at
-    n2o_flux = Fitter.n2o_flux(data, start_time)
-    co2_flux = Fitter.co2_flux(data, start_time)
-    ch4_flux = Fitter.ch4_flux(data, start_time)
-
-    state = Map.put(state, :data, data)
-            |> Map.put(:n2o_flux, n2o_flux)
-            |> Map.put(:co2_flux, co2_flux)
-            |> Map.put(:ch4_flux, ch4_flux)
-
-    Endpoint.broadcast_from(self(), "data", "new", datum)
-    Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
-    {:noreply, state}
-  end
-
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: false} = state) do
-    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
-    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
-    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
-    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
-
-    Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
