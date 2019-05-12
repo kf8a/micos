@@ -5,9 +5,6 @@ defmodule Instrument do
 
   defstruct datetime: DateTime.utc_now, co2: 0, n2o: 0, ch4: 0
 
-  def register() do
-  end
-
-  def unregister() do
-  end
+  defdelegate register(client_pid), to: Instrument.Reader
+  defdelegate unregister(client_pid), to: Instrument.Reader
 end
