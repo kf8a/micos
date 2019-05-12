@@ -63,7 +63,6 @@ defmodule Licor.Reader do
 
   def handle_info({:parser, result}, state) do
     Task.start(Licor.Logger, :save, [result])
-    Logger.debug inspect(result)
     broadcast(result, state[:listeners])
     {:noreply, state}
   end

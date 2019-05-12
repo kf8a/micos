@@ -24,7 +24,6 @@ defmodule Qcl.MixProject do
     [
       {:nimble_parsec, "~> 0.2"},
       {:nimble_csv, "~> 0.3"},
-      {:amqp, "~> 1.1"},
       {:circuits_uart, "~> 1.3"},
     ]
   end

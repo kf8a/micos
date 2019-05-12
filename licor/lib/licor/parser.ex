@@ -1,8 +1,9 @@
+
 defmodule Licor.Parser do
 
   def parse(data) do
     doc = Exml.parse(data)
-    %{datatime: DateTime.utc_now, co2: co2(doc),
+    %Licor{datetime: DateTime.utc_now, co2: co2(doc),
       temperature: temperature(doc), pressure: pressure(doc),
       co2_abs: co2_abs(doc), ivolt: ivolt(doc), raw: raw(doc)
     }
