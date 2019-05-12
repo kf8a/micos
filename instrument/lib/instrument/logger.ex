@@ -6,6 +6,7 @@ defmodule Instrument.Logger do
     Task.start(__MODULE__, :save_to_disk, [msg])
     Task.start(__MODULE__, :write_to_rabbitmq, [msg])
   end
+
   def save_to_disk(data) do
     {:ok, table} = :dets.open_file(:qcl_data, [type: :set])
     :dets.insert_new(table, {DateTime.utc_now, data})
@@ -27,7 +28,7 @@ defmodule Instrument.Logger do
     with {:ok, conn} = open_connection(),
          {:ok, chan} = AMQP.Channel.open(conn)
     do
-      Logger.debug "messenger sending #{inspect msg}"
+      Logger.info "messenger sending #{inspect msg}"
       AMQP.Queue.declare(chan, @queue)
       AMQP.Exchange.declare(chan, @exchange )
       AMQP.Queue.bind(chan, @queue, @exchange)

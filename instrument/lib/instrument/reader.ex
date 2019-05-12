@@ -1,7 +1,8 @@
 defmodule Instrument.Reader do
   use GenServer
 
-  alias Instrument.Logger
+  require Logger
+
   alias Qcl
 
   def start_link(_) do
@@ -24,13 +25,15 @@ defmodule Instrument.Reader do
   end
 
   def handle_info(%Qcl{}=qcl, state) do
-    state = case state[:licor] do
-      %{} ->  state
-      _ ->
-        datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
-        Logger.save(datum)
+    licor = state[:licor]
+    state = case licor do
+      %Licor{} ->
+        datum = %{datetime: qcl.datetime, ch4: qcl.ch4_ppm_dry, n2o: qcl.n2o_ppb_dry, co2: licor.co2}
+        Instrument.Logger.save(datum)
         # emit data
         Map.put(state, :data, datum)
+      _ ->
+        Logger.warn "unkown state #{inspect state}"
     end
     {:noreply, state}
   end

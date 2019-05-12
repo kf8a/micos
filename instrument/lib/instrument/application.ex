@@ -8,6 +8,10 @@ defmodule Instrument.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
+      Licor.Reader,
+      Qcl.Reader,
+      Instrument.Reader,
+
       # Starts a worker by calling: Instrument.Worker.start_link(arg)
       # {Instrument.Worker, arg}
     ]
