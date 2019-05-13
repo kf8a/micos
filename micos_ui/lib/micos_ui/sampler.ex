@@ -9,7 +9,7 @@ defmodule MicosUi.Sampler do
   require Logger
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Sampler)
+    GenServer.start_link(__MODULE__, %{interval: 0, sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Sampler)
   end
 
   def init(state) do
@@ -55,9 +55,9 @@ defmodule MicosUi.Sampler do
     co2_flux_task = Task.async(fn() -> Fitter.co2_flux(data) end)
     ch4_flux_task = Task.async(fn() -> Fitter.ch4_flux(data) end)
 
-    n2o_flux = Task.await(n2o_flux_task)
-    co2_flux = Task.await(co2_flux_task)
-    ch4_flux = Task.await(ch4_flux_task)
+    n2o_flux = Task.await(n2o_flux_task, 25_000)
+    co2_flux = Task.await(co2_flux_task, 25_000)
+    ch4_flux = Task.await(ch4_flux_task, 25_000)
     Process.send(pid, %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, [])
   end
 
@@ -65,7 +65,7 @@ defmodule MicosUi.Sampler do
     {:noreply, Map.put(state, :sample, sample)}
   end
 
-  def handle_cast(:stop, state) do
+  def handle_cast(:stop, %{sampling: true} = state) do
     unsubscribe()
 
     save_sample(state[:sample], state)
@@ -73,6 +73,10 @@ defmodule MicosUi.Sampler do
     state = state
             |> Map.put(:sampling, false)
             |> Map.put(:sample, %Sample{})
+    {:noreply, state}
+  end
+
+  def handle_cast(:stop, state) do
     {:noreply, state}
   end
 
@@ -108,14 +112,20 @@ defmodule MicosUi.Sampler do
   def handle_info(%Instrument{} = datum, %{sampling: true} = state) do
     # We are sampling and collecting data
 
-    # compute the current fluxes
     start_time = state[:sample].started_at
     data =  [prep_datum(datum, start_time) | state[:data]]
 
-    Task.start(__MODULE__, :compute_fluxes, [data, self()])
+    # compute the current fluxes
+    # only every 30 seconds or so
+    interval = rem(state[:interval] + 1, 30)
+    if interval == 0 do
+
+      Task.start(__MODULE__, :compute_fluxes, [data, self()])
+    end
 
     state = state
             |> Map.put(:data, data)
+            |> Map.put(:interval, interval)
 
     # emit event to frontend
     Endpoint.broadcast_from(self(), "data", "new", datum)
