@@ -11,7 +11,7 @@ defmodule MicosUi.Application do
       # Start the endpoint when the application starts
       MicosUi.Repo,
       MicosUiWeb.Endpoint,
-      # Start instrument
+      # Start Sampler
       MicosUi.Sampler,
     ]
 

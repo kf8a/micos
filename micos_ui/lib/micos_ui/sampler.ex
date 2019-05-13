@@ -113,7 +113,8 @@ defmodule MicosUi.Sampler do
     # We are sampling and collecting data
 
     start_time = state[:sample].started_at
-    data =  [prep_datum(datum, start_time) | state[:data]]
+    new_datum = prep_datum(datum, start_time)
+    data =  [new_datum | state[:data]]
 
     # compute the current fluxes
     # only every 30 seconds or so
@@ -128,7 +129,7 @@ defmodule MicosUi.Sampler do
             |> Map.put(:interval, interval)
 
     # emit event to frontend
-    Endpoint.broadcast_from(self(), "data", "new", datum)
+    Endpoint.broadcast_from(self(), "data", "new", new_datum)
 
     {:noreply, state}
   end
