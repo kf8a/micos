@@ -12,9 +12,7 @@ defmodule MicosUi.Application do
       MicosUi.Repo,
       MicosUiWeb.Endpoint,
       # Start instrument
-      MicosUi.Licor,
-      MicosUi.Qcl,
-      MicosUi.Instrument,
+      # Instrument.Reader,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -18,9 +18,7 @@ defmodule MicosUi.Instrument do
 
   def status, do: GenServer.call(__MODULE__, :status)
 
-  def current_data() do
-    Genserver.call(__MODULE__, :data)
-  end
+  def current_data(), do: GenServer.call(__MODULE__, :data)
 
   def start() do
     GenServer.cast(__MODULE__, :start)
@@ -93,8 +91,8 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(%Instrument{} = datum, %{sampling: true} = state) do
-    # We are sampling and collectiing data
-    data =  [datum | data]
+    # We are sampling and collecting data
+    data =  [datum | state[:data]]
 
     # compute the current fluxes
     start_time = state[:sample].started_at
@@ -102,7 +100,8 @@ defmodule MicosUi.Instrument do
     co2_flux = Fitter.co2_flux(data, start_time)
     ch4_flux = Fitter.ch4_flux(data, start_time)
 
-    state = Map.put(:n2o_flux, n2o_flux)
+    state = state
+            |> Map.put(:n2o_flux, n2o_flux)
             |> Map.put(:co2_flux, co2_flux)
             |> Map.put(:ch4_flux, ch4_flux)
 
@@ -124,12 +123,12 @@ defmodule MicosUi.Instrument do
   end
 
   defp subscribe() do
-    Instrument.register(self())
+    Instrument.Reader.register(self())
     Endpoint.subscribe("data")
   end
 
   defp unsubscribe() do
-    Instrument.unregister(self())
+    Instrument.Reader.unregister(self())
     Endpoint.unsubscribe("data")
   end
 end

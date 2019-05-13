@@ -32,8 +32,7 @@ defmodule MicosUi.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:qcl, path: "../qcl"},
-      {:licor, path: "../licor"},
+      {:instrument, path: "../instrument"},
       {:phoenix, "~> 1.4.0"},
 			{:phoenix_pubsub, "~> 1.1"},
 			{:phoenix_ecto, "~> 4.0"},

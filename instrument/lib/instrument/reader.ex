@@ -20,13 +20,9 @@ defmodule Instrument.Reader do
     GenServer.cast(__MODULE__, {:unregister, client_pid})
   end
 
-  def subscribe() do
+  def handle_info(:subscribe, state) do
     Licor.Reader.register(self())
     Qcl.Reader.register(self())
-  end
-
-  def handle_info(:register, state) do
-    subscribe()
     {:noreply, state}
   end
 
