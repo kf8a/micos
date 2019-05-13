@@ -81,6 +81,11 @@ defmodule MicosUi.Sampler do
   end
 
   def handle_cast(:start, state) do
+    Process.send_after(self(), :sample, 120_000)
+    {:noreply, state}
+  end
+
+  def handle_info(:sample, state) do
     subscribe()
     now = DateTime.utc_now
     {:ok, sample} = Samples.update_sample(state[:sample], %{started_at: now})

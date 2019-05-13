@@ -19,8 +19,8 @@
     Air Temperature: <%= number_input f, :air_temperature, step: 0.1 %>
   </label>
 
-  <button phx-click="sample", phx_disable_with: "sampling..", <%= if !@changeset.valid? || @sampling do %> disabled <% end %>  >Start sample</button>
-  <button phx-click="next", phx_disable_with: "next sample...", <%= if !@changeset.valid? do %> disabled <% end %>  > Next sample</button>
+  <button phx-click="sample", phx_disable_with: "sampling..", <%= if !@changeset.valid? || @sampling do %> disabled <% end %>  >Start</button>
+  <button phx-click="next", phx_disable_with: "next sample...", <%= if !@changeset.valid? do %> disabled <% end %>  > Stop</button>
 
   </form>
 
