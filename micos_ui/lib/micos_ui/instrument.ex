@@ -124,10 +124,12 @@ defmodule MicosUi.Instrument do
   end
 
   defp subscribe() do
+    Instrument.register(self())
     Endpoint.subscribe("data")
   end
 
   defp unsubscribe() do
+    Instrument.unregister(self())
     Endpoint.unsubscribe("data")
   end
 end
