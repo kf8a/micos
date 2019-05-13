@@ -21,6 +21,10 @@ config :micos_ui, MicosUiWeb.Endpoint,
     signing_salt: "lRsZg5udV88srXmmGPkIxWHR71ODBLDHYgnjKB7B0/6+WxPbexPFw06Uc++DA+IV"
   ]
 
+# silence lager logger
+config :lager,
+  error_logger_redirect: false,
+  handlers: [level: :critical]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -32,9 +36,6 @@ config :phoenix, :json_library, Jason
 
 config :phoenix,
   template_engines: [leex: Phoenix.LiveView.Engine]
-
-config :micos_ui,
-  debug: true
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

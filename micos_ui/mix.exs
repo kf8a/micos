@@ -46,6 +46,7 @@ defmodule MicosUi.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:numerix, "~> 0.5"},
       {:distillery, "~> 2.0"},
+      {:benchee, "~> 1.0", only: :dev},
       {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"}
     ]
   end

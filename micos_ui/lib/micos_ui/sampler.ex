@@ -50,6 +50,17 @@ defmodule MicosUi.Sampler do
   def save_sample(%Sample{} = _, _ ) do
   end
 
+  def compute_fluxes(data, pid) do
+    n2o_flux_task = Task.async(fn() -> Fitter.n2o_flux(data) end)
+    co2_flux_task = Task.async(fn() -> Fitter.co2_flux(data) end)
+    ch4_flux_task = Task.async(fn() -> Fitter.ch4_flux(data) end)
+
+    n2o_flux = Task.await(n2o_flux_task)
+    co2_flux = Task.await(co2_flux_task)
+    ch4_flux = Task.await(ch4_flux_task)
+    Process.send(pid, %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, [])
+  end
+
   def handle_cast({:sample, sample}, state) do
     {:noreply, Map.put(state, :sample, sample)}
   end
@@ -90,25 +101,36 @@ defmodule MicosUi.Sampler do
     {:reply, state[:data], state}
   end
 
+  def prep_datum(%Instrument{} = datum, start_time) do
+    Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
+  end
+
   def handle_info(%Instrument{} = datum, %{sampling: true} = state) do
     # We are sampling and collecting data
-    data =  [datum | state[:data]]
 
     # compute the current fluxes
     start_time = state[:sample].started_at
-    n2o_flux = Fitter.n2o_flux(data, start_time)
-    co2_flux = Fitter.co2_flux(data, start_time)
-    ch4_flux = Fitter.ch4_flux(data, start_time)
+    data =  [prep_datum(datum, start_time) | state[:data]]
+
+    Task.start(__MODULE__, :compute_fluxes, [data, self()])
+
+    state = state
+            |> Map.put(:data, data)
+
+    # emit event to frontend
+    Endpoint.broadcast_from(self(), "data", "new", datum)
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, state) do
 
     state = state
             |> Map.put(:n2o_flux, n2o_flux)
             |> Map.put(:co2_flux, co2_flux)
             |> Map.put(:ch4_flux, ch4_flux)
 
-    # emit event to frontend
-    Endpoint.broadcast_from(self(), "data", "new", datum)
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
-
     {:noreply, state}
   end
 
