@@ -8,7 +8,8 @@ defmodule Instrument.Reader do
   end
 
   def init(state) do
-    Process.send_after(self(), :subscribe, 1000)
+    Licor.Reader.register(self())
+    Qcl.Reader.register(self())
     {:ok, state}
   end
 
@@ -20,10 +21,8 @@ defmodule Instrument.Reader do
     GenServer.cast(__MODULE__, {:unregister, client_pid})
   end
 
-  def handle_info(:subscribe, state) do
-    Licor.Reader.register(self())
-    Qcl.Reader.register(self())
-    {:noreply, state}
+  def broadcast(result, listeners) do
+    Enum.map(listeners, fn x -> Process.send(x, result, []) end)
   end
 
   def handle_info(%Licor{} = data, state) do
@@ -36,7 +35,7 @@ defmodule Instrument.Reader do
       %Licor{} ->
         datum = %{datetime: qcl.datetime, ch4: qcl.ch4_ppm_dry, n2o: qcl.n2o_ppb_dry, co2: licor.co2}
         Instrument.Logger.save(datum)
-        # emit data
+        broadcast(datum, state[:listeners])
         Map.put(state, :data, datum)
       _ ->
         Logger.warn "unkown state #{inspect state}"

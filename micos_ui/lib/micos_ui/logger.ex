@@ -5,11 +5,11 @@ defmodule MicosUi.Logger do
     Task.start(__MODULE__, :write_to_rabbitmq, [msg])
   end
 
-  @queue "micos_samples"
-  @exchange "micos_samples"
+  @queue "samples"
+  @exchange "samples"
 
   def open_connection() do
-    config = Application.get_env(:amqp, Licor.Messenger)
+    config = Application.get_env(:amqp, Instrument.Messenger)
     AMQP.Connection.open(host: config[:host],
                          virtual_host: "micos",
                          username: config[:user],

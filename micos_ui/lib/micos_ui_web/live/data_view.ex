@@ -12,7 +12,7 @@ defmodule MicosUiWeb.DataView do
   end
 
   def mount(_session, socket) do
-    status = MicosUi.Instrument.status()
+    status = MicosUi.Sampler.status()
     plots = Samples.get_plots_for_select()
 
     fluxes = round5(flux_to_map(status))
@@ -57,9 +57,9 @@ defmodule MicosUiWeb.DataView do
   end
 
   def handle_event("sample", _value, socket) do
-    MicosUi.Instrument.start()
+    MicosUi.Sampler.start()
     MicosUi.Logger.save(%{event: "start", datetime: DateTime.utc_now})
-    status = MicosUi.Instrument.status()
+    status = MicosUi.Sampler.status()
 
     live = %{sampling: status[:sampling]}
     {:noreply, assign(socket, Map.merge(live, round5(flux_to_map(status)))) }
@@ -67,28 +67,28 @@ defmodule MicosUiWeb.DataView do
 
   def handle_event("stop", _value, socket) do
     MicosUi.Logger.save(%{event: "stop", datetime: DateTime.utc_now})
-    MicosUi.Instrument.stop()
-    #status = MicosUi.Instrument.status()
+    MicosUi.Sampler.stop()
+    #status = MicosUi.Sampler.status()
     {:noreply, assign(socket, sampling: "false") }
   end
 
   def handle_event("next", _value, socket) do
     MicosUi.Logger.save(%{event: "next", datetime: DateTime.utc_now})
-    MicosUi.Instrument.stop()
-    status = MicosUi.Instrument.status()
+    MicosUi.Sampler.stop()
+    status = MicosUi.Sampler.status()
     {:noreply, assign(socket, sampling: status[:sampling],
                               changeset: Samples.change_sample(%Sample{})) }
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
-    status = MicosUi.Instrument.status
+    status = MicosUi.Sampler.status
     sample = status[:sample]
     changeset = sample
                 |> Sample.changeset(params)
 
     if changeset.valid? do
       {:ok, sample} = Samples.insert_or_update(sample, params)
-      MicosUi.Instrument.set_sample(sample)
+      MicosUi.Sampler.set_sample(sample)
     end
 
     {:noreply, assign(socket, changeset: changeset) }

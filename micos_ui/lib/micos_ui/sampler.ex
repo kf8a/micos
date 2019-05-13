@@ -1,4 +1,4 @@
-defmodule MicosUi.Instrument do
+defmodule MicosUi.Sampler do
   use GenServer
 
   alias MicosUiWeb.Endpoint
@@ -9,7 +9,7 @@ defmodule MicosUi.Instrument do
   require Logger
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Instrument)
+    GenServer.start_link(__MODULE__, %{sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Sampler)
   end
 
   def init(state) do
@@ -118,17 +118,17 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_info(data, state) do
-    Logger.info "unknown #{inspect(data)}"
+    Logger.warn "unknown #{inspect(data)}"
     {:noreply, state}
   end
 
   defp subscribe() do
-    Instrument.Reader.register(self())
+    Instrument.register(self())
     Endpoint.subscribe("data")
   end
 
   defp unsubscribe() do
-    Instrument.Reader.unregister(self())
+    Instrument.unregister(self())
     Endpoint.unsubscribe("data")
   end
 end
