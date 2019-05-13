@@ -8,8 +8,6 @@ defmodule MicosUi.Instrument do
 
   require Logger
 
-  @debug Application.get_env(:micos_ui, :debug)
-
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Instrument)
   end
@@ -19,6 +17,10 @@ defmodule MicosUi.Instrument do
   end
 
   def status, do: GenServer.call(__MODULE__, :status)
+
+  def current_data() do
+    Genserver.call(__MODULE__, :data)
+  end
 
   def start() do
     GenServer.cast(__MODULE__, :start)
@@ -55,7 +57,6 @@ defmodule MicosUi.Instrument do
   end
 
   def handle_cast(:stop, state) do
-    Endpoint.broadcast_from(self(), "sampling", "stop", DateTime.utc_now)
     unsubscribe()
 
     save_sample(state[:sample], state)
@@ -71,8 +72,6 @@ defmodule MicosUi.Instrument do
     now = DateTime.utc_now
     {:ok, sample} = Samples.update_sample(state[:sample], %{started_at: now})
 
-    Endpoint.broadcast_from(self(), "sampling", "start", now)
-
     state = state
             |> Map.put(:sampling, true)
             |> Map.put(:data, [])
@@ -82,10 +81,6 @@ defmodule MicosUi.Instrument do
             |> Map.put(:co2_flux, %{})
             |> Map.put(:ch4_flux, %{})
 
-    if @debug do
-      Process.send_after(self(), :tick, 1_000)
-    end
-
     {:noreply, state}
   end
 
@@ -93,77 +88,33 @@ defmodule MicosUi.Instrument do
     {:reply, state, state}
   end
 
-
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{licor: licor}=_payload, topic: "licor"}, %{sampling: true, data: _} = state) do
-    state = Map.put(state, :licor, licor)
-    {:noreply, state}
+  def handle_call(:data, _from, state) do
+    {:reply, state[:data], state}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", topic: "licor"}, state) do
-    {:noreply, state}
-  end
-
-
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: true, data: data} = state) do
-    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
-    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
-    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
-    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
-    Logger.debug(inspect(datum))
-    data = if datum[:co2] != nil do
-      [datum | data]
-    else
-      data
-    end
-
-    start_time = state[:sample].started_at
-    n2o_flux = Fitter.n2o_flux(data, start_time)
-    co2_flux = Fitter.co2_flux(data, start_time)
-    ch4_flux = Fitter.ch4_flux(data, start_time)
-
-    state = Map.put(state, :data, data)
-            |> Map.put(:n2o_flux, n2o_flux)
-            |> Map.put(:co2_flux, co2_flux)
-            |> Map.put(:ch4_flux, ch4_flux)
-
-    Endpoint.broadcast_from(self(), "data", "new", datum)
-    Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
-    {:noreply, state}
-  end
-
-  def handle_info(%Phoenix.Socket.Broadcast{event: "data", payload: %{qcl: qcl}=_payload, topic: "qcl"}, %{sampling: false} = state) do
-    # %{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
-    #   ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
-    #   n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data)}
-    datum = %{datetime: qcl[:datetime], ch4: qcl[:ch4_ppm_dry], n2o: qcl[:n2o_ppb_dry], co2: state[:licor][:co2]}
-
-    Endpoint.broadcast_from(self(), "data", "new", datum)
-    {:noreply, state}
-  end
-
-  def handle_info(:tick, %{sampling: true, data: data} = state) do
-    datum = %{datetime: DateTime.utc_now(), ch4: :rand.uniform , n2o: :rand.uniform , co2: :rand.uniform}
+  def handle_info(%Instrument{} = datum, %{sampling: true} = state) do
+    # We are sampling and collectiing data
     data =  [datum | data]
 
+    # compute the current fluxes
     start_time = state[:sample].started_at
     n2o_flux = Fitter.n2o_flux(data, start_time)
     co2_flux = Fitter.co2_flux(data, start_time)
     ch4_flux = Fitter.ch4_flux(data, start_time)
 
-    state = Map.put(state, :data, data)
-            |> Map.put(:n2o_flux, n2o_flux)
+    state = Map.put(:n2o_flux, n2o_flux)
             |> Map.put(:co2_flux, co2_flux)
             |> Map.put(:ch4_flux, ch4_flux)
 
+    # emit event to frontend
     Endpoint.broadcast_from(self(), "data", "new", datum)
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
-
-    Process.send_after(self(), :tick, 1_000)
 
     {:noreply, state}
   end
 
-  def handle_info(:tick, state) do
+  def handle_info(%Instrument{} = datum, %{sampling: false} = state) do
+    Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
@@ -174,16 +125,9 @@ defmodule MicosUi.Instrument do
 
   defp subscribe() do
     Endpoint.subscribe("data")
-    Endpoint.subscribe("sampling")
-    Endpoint.subscribe("licor")
-    Endpoint.subscribe("qcl")
   end
 
   defp unsubscribe() do
     Endpoint.unsubscribe("data")
-    Endpoint.unsubscribe("sampling")
-    Endpoint.unsubscribe("licor")
-    Endpoint.unsubscribe("qcl")
   end
-
 end
