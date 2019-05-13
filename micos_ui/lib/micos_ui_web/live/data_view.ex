@@ -21,7 +21,7 @@ defmodule MicosUiWeb.DataView do
 
     live = %{sampling: status[:sampling],
       changeset: Samples.change_sample(%Sample{}), plots: plots,
-      datum: '',
+      datum: %Instrument{},
       n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
       ch4_flux: '', ch4_r2: ''}
 
@@ -116,7 +116,6 @@ defmodule MicosUiWeb.DataView do
   end
 
   def handle_info(message, socket) do
-    IO.inspect "unkwnon message #{inspect message}"
     Logger.error "unknown messaage #{inspect message}"
     {:noreply, socket}
   end

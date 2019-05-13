@@ -37,19 +37,19 @@
       </tr>
       <tr>
         <td>N2O (ppb)</td>
-        <td><%= @datum[:n2o] %>
+        <td><%= Float.round(@datum.n2o, 2) %>
         <td> <%= @n2o_flux %></td>
         <td><%= @n2o_r2 %></td>
       </tr>
       <tr>
         <td>CO2 (ppm)</td>
-        <td><%= @datum[:co2] %>
+        <td><%= Float.round(@datum.co2, 1) %>
         <td> <%= @co2_flux %></td>
         <td><%= @co2_r2 %></td>
       </tr>
       <tr>
         <td>CH4 (ppm)</td>
-        <td><%= @datum[:ch4] %>
+        <td><%= Float.round(@datum.ch4, 2) %>
         <td> <%= @ch4_flux %></td>
         <td><%= @ch4_r2 %></td>
       </tr>
