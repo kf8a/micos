@@ -1,12 +1,15 @@
-defmodule MicosUi.MicosUI.Point do
+defmodule MicosUi.Points.Point do
   use Ecto.Schema
   import Ecto.Changeset
 
   alias MicosUi.Samples.Sample
 
   schema "points" do
-    field :compound, :string
-    field :value, :float
+    field :datetime, :utc_datetime
+    field :n2o, :float
+    field :co2, :float
+    field :ch4, :float
+    field :minute, :float
     belongs_to :sample, Sample
 
     timestamps()
@@ -15,7 +18,7 @@ defmodule MicosUi.MicosUI.Point do
   @doc false
   def changeset(point, attrs) do
     point
-    |> cast(attrs, [:sample_id, :compound, :value])
-    |> validate_required([:sample_id, :compound, :value])
+    |> cast(attrs, [:sample_id, :n2o, :co2, :ch4, :datetime, :minute])
+    |> validate_required([:sample_id, :datetime, :minute])
   end
 end

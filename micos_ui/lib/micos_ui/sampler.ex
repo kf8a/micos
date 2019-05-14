@@ -102,7 +102,7 @@ defmodule MicosUi.Sampler do
   end
 
   def handle_cast(:start, state) do
-    Process.send_after(self(), :sample, 120_000)
+    Process.send_after(self(), :sample, 12_000)
     Process.send_after(__MODULE__, :tick, 1_000)
 
     state = state
@@ -111,6 +111,19 @@ defmodule MicosUi.Sampler do
 
     {:noreply, state}
   end
+
+  def handle_call(:status, _from, state) do
+    {:reply, state, state}
+  end
+
+  def handle_call(:data, _from, state) do
+    {:reply, state[:data], state}
+  end
+
+  def prep_datum(%Instrument{} = datum, start_time) do
+    Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
+  end
+
 
   def handle_info(:tick, %{waiting: true}=state) do
     Process.send_after(__MODULE__, :tick, 1_000)
@@ -123,7 +136,6 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
-  # def handle_cast(:start, state) do
   def handle_info(:sample, state) do
     subscribe()
     now = DateTime.utc_now
@@ -142,32 +154,23 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
-  def handle_call(:status, _from, state) do
-    {:reply, state, state}
-  end
-
-  def handle_call(:data, _from, state) do
-    {:reply, state[:data], state}
-  end
-
-  def prep_datum(%Instrument{} = datum, start_time) do
-    Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
-  end
-
+  # We are sampling and collecting data
   def handle_info(%Instrument{} = datum, %{sampling: true} = state) do
-    # We are sampling and collecting data
-
     start_time = state[:sample].started_at
     new_datum = prep_datum(datum, start_time)
     data =  [new_datum | state[:data]]
 
+    # every 30 seconds or so
     # compute the current fluxes
-    # only every 30 seconds or so
     interval = rem(state[:interval] + 1, 30)
     if interval == 0 do
 
       Task.start(__MODULE__, :compute_fluxes, [data, self()])
     end
+
+
+    # save data to db
+    MicosUi.Points.create_point(Map.put(Map.from_struct(new_datum), :sample_id, state[:sample].id))
 
     state = state
             |> Map.put(:data, data)
