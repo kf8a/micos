@@ -69,13 +69,14 @@ defmodule MicosUiWeb.DataView do
   def handle_event("stop", _value, socket) do
     MicosUi.Logger.save(%{event: "stop", datetime: DateTime.utc_now})
     MicosUi.Sampler.stop()
-    #status = MicosUi.Sampler.status()
-    {:noreply, assign(socket, sampling: "false") }
+    status = MicosUi.Sampler.status()
+    {:noreply, assign(socket, sampling: status[:sampling],
+                              changeset: Samples.change_sample(%Sample{})) }
   end
 
-  def handle_event("next", _value, socket) do
-    MicosUi.Logger.save(%{event: "next", datetime: DateTime.utc_now})
-    MicosUi.Sampler.stop()
+  def handle_event("abort", _value, socket) do
+    MicosUi.Logger.save(%{event: "abort", datetime: DateTime.utc_now})
+    MicosUi.Sampler.abort()
     status = MicosUi.Sampler.status()
     {:noreply, assign(socket, sampling: status[:sampling],
                               changeset: Samples.change_sample(%Sample{})) }
@@ -96,7 +97,7 @@ defmodule MicosUiWeb.DataView do
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
-    seconds = rem(trunc(payload.minute * 60), 60)
+    seconds = abs(rem(trunc(payload.minute * 60), 60))
     minutes = trunc(payload.minute)
     {:noreply, assign(socket, datum: payload, duration: "#{minutes}:#{seconds}")}
   end
