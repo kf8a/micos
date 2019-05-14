@@ -3,13 +3,18 @@ defmodule Instrument.Reader do
 
   require Logger
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, %{licor: %{}, data: %Instrument{}, listeners: []}, name: Instrument.Reader)
+  def start_link(debug \\ false) do
+    GenServer.start_link(__MODULE__, %{debug: debug, licor: %{}, data: %Instrument{}, listeners: []}, name: Instrument.Reader)
   end
 
   def init(state) do
-    Licor.Reader.register(self())
-    Qcl.Reader.register(self())
+    case state[:debug] do
+      true ->
+        Process.send_after(__MODULE__, :tick, 1_000)
+      false ->
+        Licor.Reader.register(self())
+        Qcl.Reader.register(self())
+    end
     {:ok, state}
   end
 
@@ -23,6 +28,14 @@ defmodule Instrument.Reader do
 
   def broadcast(result, listeners) do
     Enum.map(listeners, fn x -> Process.send(x, result, []) end)
+  end
+
+  def handle_info(:tick, state) do
+    number = :rand.uniform(1000)/1000
+    datum = %Instrument{datetime: DateTime.utc_now(), ch4: number, n2o: number, co2: number}
+    broadcast(datum, state[:listeners])
+    Process.send_after(__MODULE__, :tick, 1_000)
+    {:noreply, state}
   end
 
   def handle_info(%Licor{} = data, state) do

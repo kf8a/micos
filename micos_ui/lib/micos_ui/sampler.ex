@@ -37,7 +37,7 @@ defmodule MicosUi.Sampler do
   end
 
 
-  def save_sample(%Sample{} = sample, %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
+  def save_sample_flux(%Sample{} = sample, %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
                                         co2_flux: %{slope: co2_flux, r2: co2_r2},
                                         n2o_flux: %{slope: n2o_flux, r2: n2o_r2}}) do
     Logger.info "saving sample #{inspect sample}"
@@ -47,7 +47,7 @@ defmodule MicosUi.Sampler do
   end
 
   # If save_sample is called with anything else it will do nothing
-  def save_sample(%Sample{} = _, _ ) do
+  def save_sample_flux(%Sample{} = _, _ ) do
   end
 
   def compute_fluxes(data, pid) do
@@ -68,7 +68,10 @@ defmodule MicosUi.Sampler do
   def handle_cast(:stop, %{sampling: true} = state) do
     unsubscribe()
 
-    save_sample(state[:sample], state)
+    sample = state[:sample]
+    Samples.update_sample(sample, %{finished_at: DateTime.utc_now()})
+
+    save_sample_flux(sample, state)
 
     state = state
             |> Map.put(:sampling, false)
@@ -81,10 +84,12 @@ defmodule MicosUi.Sampler do
   end
 
   def handle_cast(:start, state) do
-    Process.send_after(self(), :sample, 120_000)
+    # Process.send_after(self(), :sample, 120_000)
+    Process.send_after(self(), :sample, 10_000)
     {:noreply, state}
   end
 
+  # def handle_cast(:start, state) do
   def handle_info(:sample, state) do
     subscribe()
     now = DateTime.utc_now

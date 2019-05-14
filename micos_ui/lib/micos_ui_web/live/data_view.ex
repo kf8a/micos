@@ -18,9 +18,10 @@ defmodule MicosUiWeb.DataView do
     fluxes = round5(flux_to_map(status))
 
     Endpoint.subscribe("data")
+    sample = status[:sample]
 
     live = %{sampling: status[:sampling],
-      changeset: Samples.change_sample(%Sample{}), plots: plots,
+      changeset: Samples.change_sample(sample), plots: plots,
       datum: %Instrument{}, duration: "0:0",
       n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
       ch4_flux: '', ch4_r2: ''}
