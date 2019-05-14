@@ -102,7 +102,7 @@ defmodule MicosUi.Sampler do
   end
 
   def handle_cast(:start, state) do
-    Process.send_after(self(), :sample, 12_000)
+    Process.send_after(self(), :sample, 120_000)
     Process.send_after(__MODULE__, :tick, 1_000)
 
     state = state
