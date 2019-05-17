@@ -38,12 +38,18 @@ defmodule MicosUi.Sampler do
 
 
   def save_sample_flux(%Sample{} = sample, %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
-                                        co2_flux: %{slope: co2_flux, r2: co2_r2},
-                                        n2o_flux: %{slope: n2o_flux, r2: n2o_r2}}) do
+                                            co2_flux: %{slope: co2_flux, r2: co2_r2},
+                                            n2o_flux: %{slope: n2o_flux, r2: n2o_r2}}) do
     Logger.info "saving sample #{inspect sample}"
-    {:ok, _} = Samples.update_sample(sample, %{n2o_slope: n2o_flux, n2o_r2: n2o_r2,
-                                               co2_slope: co2_flux, co2_r2: co2_r2,
-                                               ch4_slope: ch4_flux, ch4_r2: ch4_r2})
+
+    case Samples.update_sample(sample, %{n2o_slope: n2o_flux, n2o_r2: n2o_r2,
+                                         co2_slope: co2_flux, co2_r2: co2_r2,
+                                         ch4_slope: ch4_flux, ch4_r2: ch4_r2}) do
+      {:ok, sample} ->
+        sample
+      {:error, changeset} ->
+        Logger.debug "Failed to save #{inspect changeset}"
+    end
   end
 
   # If save_sample is called with anything else it will do nothing
