@@ -20,7 +20,7 @@ defmodule MicosUiWeb.DataView do
     Endpoint.subscribe("data")
     sample = status[:sample]
 
-    live = %{sampling: status[:sampling],
+    live = %{sampling: status[:waiting] || status[:sampling],
       changeset: Samples.change_sample(sample), plots: plots,
       datum: %Instrument{}, duration: "0:0",
       n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
@@ -62,7 +62,7 @@ defmodule MicosUiWeb.DataView do
     MicosUi.Logger.save(%{event: "start", datetime: DateTime.utc_now})
     status = MicosUi.Sampler.status()
 
-    live = %{sampling: status[:sampling]}
+    live = %{sampling: status[:waiting] || status[:sampling]}
     {:noreply, assign(socket, Map.merge(live, round5(flux_to_map(status)))) }
   end
 
@@ -70,7 +70,7 @@ defmodule MicosUiWeb.DataView do
     MicosUi.Logger.save(%{event: "stop", datetime: DateTime.utc_now})
     MicosUi.Sampler.stop()
     status = MicosUi.Sampler.status()
-    {:noreply, assign(socket, sampling: status[:sampling],
+    {:noreply, assign(socket, sampling: status[:waiting] || status[:sampling],
                               changeset: Samples.change_sample(%Sample{})) }
   end
 
@@ -78,12 +78,13 @@ defmodule MicosUiWeb.DataView do
     MicosUi.Logger.save(%{event: "abort", datetime: DateTime.utc_now})
     MicosUi.Sampler.abort()
     status = MicosUi.Sampler.status()
-    {:noreply, assign(socket, sampling: status[:sampling],
+    {:noreply, assign(socket, sampling: status[:waiting] || status[:sampling],
                               changeset: Samples.change_sample(%Sample{})) }
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
     status = MicosUi.Sampler.status
+    IO.inspect status
     sample = status[:sample]
     changeset = sample
                 |> Sample.changeset(params)
@@ -93,7 +94,7 @@ defmodule MicosUiWeb.DataView do
       MicosUi.Sampler.set_sample(sample)
     end
 
-    {:noreply, assign(socket, changeset: changeset) }
+    {:noreply, assign(socket, sampling: status[:waiting] || status[:sampling], changeset: changeset) }
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
