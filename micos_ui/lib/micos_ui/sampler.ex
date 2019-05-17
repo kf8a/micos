@@ -108,6 +108,7 @@ defmodule MicosUi.Sampler do
         sample
       {:error, changeset} ->
         Logger.warn "failed to save sample while stopping #{inspect changeset}"
+    end
 
     save_sample_flux(sample, state)
 
