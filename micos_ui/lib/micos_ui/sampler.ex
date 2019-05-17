@@ -48,7 +48,7 @@ defmodule MicosUi.Sampler do
       {:ok, sample} ->
         sample
       {:error, changeset} ->
-        Logger.debug "Failed to save #{inspect changeset}"
+        Logger.warn "Failed to save sample with fluxes: #{inspect changeset}"
     end
   end
 
@@ -74,8 +74,18 @@ defmodule MicosUi.Sampler do
   def handle_cast(:abort, %{sampling: true} = state) do
     unsubscribe()
     sample = state[:sample]
-    Samples.update_sample(sample, %{finished_at: DateTime.utc_now()})
-    Samples.update_sample(sample, %{deleted: true})
+    case Samples.update_sample(sample, %{finished_at: DateTime.utc_now()}) do
+      {:ok, sample} ->
+        sample
+      {:error, changeset} ->
+        Logger.warn "failed to update sample with finished: #{inspect changeset}"
+    end
+    case Samples.update_sample(sample, %{deleted: true}) do
+      {:ok, sample} ->
+        sample
+      {:error, changeset} ->
+        Logger.warn "failed to update sample with deleted: #{inspect changeset}"
+    end
 
     state = state
             |> Map.put(:sampling, false)
@@ -92,7 +102,12 @@ defmodule MicosUi.Sampler do
     unsubscribe()
 
     sample = state[:sample]
-    Samples.update_sample(sample, %{finished_at: DateTime.utc_now()})
+
+    case Samples.update_sample(sample, %{finished_at: DateTime.utc_now()}) do
+      {:ok, sample} ->
+        sample
+      {:error, changeset} ->
+        Logger.warn "failed to save sample while stopping #{inspect changeset}"
 
     save_sample_flux(sample, state)
 
