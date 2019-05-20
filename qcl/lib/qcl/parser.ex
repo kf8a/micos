@@ -2,10 +2,14 @@ alias NimbleCSV.RFC4180, as: CSV
 
 defmodule Qcl.Parser do
 
+  require Logger
+
   alias Qcl.DatetimeParser
 
   def parse(raw_data) do
+    Logger.debug "QCL data from port: #{inspect raw_data}"
     [data] = CSV.parse_string(raw_data, skip_headers: false)
+    Logger.debug "QCL parsed data: #{inspect data}"
     %Qcl{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
       ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
       n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data),

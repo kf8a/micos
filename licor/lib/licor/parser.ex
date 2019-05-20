@@ -1,8 +1,11 @@
 
 defmodule Licor.Parser do
 
+  require Logger
   def parse(data) do
+    Logger.debug "LICOR: data from port: #{inspect data}"
     doc = Exml.parse(data)
+    Logger.debug "LICOR: parsed data: #{inspect doc}"
     %Licor{datetime: DateTime.utc_now, co2: co2(doc),
       temperature: temperature(doc), pressure: pressure(doc),
       co2_abs: co2_abs(doc), ivolt: ivolt(doc), raw: raw(doc)
