@@ -23,7 +23,7 @@ defmodule Qcl.Parser do
     end
   end
 
-  defp instrument_datetime(data) when length(data) > 1 do
+  defp instrument_datetime(data) when length(data) > 10 do
     {:ok, datetime} = Enum.fetch(data, 0)
     case parse_datetime(datetime) do
       {:ok, date_list, _rest, _, _, _} ->

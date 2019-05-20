@@ -4,8 +4,8 @@ defmodule ParserFailTest do
 
   test 'fails on malformed data' do
     check all data <- StreamData.binary() do
-      result = Qcl.Parser.parse(data)
-      assert {:error, _ } = result
+      assert {:error, _ } = Qcl.Parser.parse(data)
+      # assert_raise NimbleCSV.ParseError, fn -> Qcl.Parser.parse(data) end
     end
   end
 
