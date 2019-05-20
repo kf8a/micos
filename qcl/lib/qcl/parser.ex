@@ -8,23 +8,40 @@ defmodule Qcl.Parser do
 
   def parse(raw_data) do
     Logger.debug "QCL data from port: #{inspect raw_data}"
-    [data] = CSV.parse_string(raw_data, skip_headers: false)
+    data = case CSV.parse_string(raw_data, skip_headers: false) do
+      [datum] -> datum
+      datum -> datum
+    end
     Logger.debug "QCL parsed data: #{inspect data}"
-    %Qcl{instrument_datetime: instrument_datetime(data), datetime: DateTime.utc_now,
-      ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
-      n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data),
-      n2o_ppb_dry: n2o_ppm_dry(data)*1000}
+    case instrument_datetime(data) do
+      {:error, msg } -> {:error, msg}
+      {:ok, datetime } ->
+        %Qcl{instrument_datetime: datetime, datetime: DateTime.utc_now,
+          ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
+          n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data),
+          n2o_ppb_dry: n2o_ppm_dry(data)*1000}
+    end
+  end
+
+  defp instrument_datetime(data) when length(data) > 1 do
+    {:ok, datetime} = Enum.fetch(data, 0)
+    case parse_datetime(datetime) do
+      {:ok, date_list, _rest, _, _, _} ->
+        [year, month, day, hour,minute, sec, millisec] = date_list
+        NaiveDateTime.new(year, month, day, hour, minute, sec, millisec*1000)
+      {:error, msg} ->
+            {:error, msg}
+    end
   end
 
   defp instrument_datetime(data) do
-    {:ok, datetime} = Enum.fetch(data, 0)
-    {:ok, date_list, _rest, _, _, _} = datetime
-                                        |> String.trim
-                                        |> DatetimeParser.datetime
+    {:error, "No data to process #{inspect data}"}
+  end
 
-    [year, month, day, hour,minute, sec, millisec] = date_list
-    {:ok, naive_date} = NaiveDateTime.new(year, month, day, hour, minute, sec, millisec*1000)
-    naive_date
+  defp parse_datetime(datetime)  do
+    datetime
+    |> String.trim
+    |> DatetimeParser.datetime
   end
 
   defp ch4_ppm(data) do

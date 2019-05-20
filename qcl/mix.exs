@@ -24,6 +24,7 @@ defmodule Qcl.MixProject do
     [
       {:nimble_parsec, "~> 0.2"},
       {:nimble_csv, "~> 0.3"},
+      {:stream_data, "~> 0.1", only: :test},
       {:circuits_uart, "~> 1.3"},
     ]
   end
