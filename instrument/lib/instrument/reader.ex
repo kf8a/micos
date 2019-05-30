@@ -52,6 +52,7 @@ defmodule Instrument.Reader do
         Map.put(state, :data, datum)
       _ ->
         Logger.warn "unkown state #{inspect state}"
+        state
     end
     {:noreply, state}
   end
