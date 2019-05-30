@@ -7,12 +7,14 @@ defmodule Qcl.Parser do
   alias Qcl.DatetimeParser
 
   def parse(raw_data) do
-    Logger.debug "QCL data from port: #{inspect raw_data}"
     data = case CSV.parse_string(raw_data, skip_headers: false) do
       [datum] -> datum
       datum -> datum
     end
-    Logger.debug "QCL parsed data: #{inspect data}"
+    if n2o_ppm(data) == 0  do
+      Logger.debug "QCL parsed data: #{inspect data}"
+      Logger.debug "QCL data from port: #{inspect raw_data}"
+    end
     case instrument_datetime(data) do
       {:error, msg } -> {:error, msg}
       {:ok, datetime } ->
