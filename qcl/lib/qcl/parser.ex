@@ -16,7 +16,6 @@ defmodule Qcl.Parser do
       Logger.debug "QCL data from port: #{inspect raw_data}"
     end
     case instrument_datetime(data) do
-      {:error, msg } -> {:error, msg}
       {:ok, datetime } ->
         %Qcl{instrument_datetime: datetime, datetime: DateTime.utc_now,
           ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
@@ -32,7 +31,7 @@ defmodule Qcl.Parser do
         [year, month, day, hour,minute, sec, millisec] = date_list
         NaiveDateTime.new(year, month, day, hour, minute, sec, millisec*1000)
       {:error, msg} ->
-            {:error, msg}
+            raise "msg"
     end
   end
 
