@@ -19,7 +19,7 @@ defmodule MicosUi.MixProject do
   def application do
     [
       mod: {MicosUi.Application, []},
-      extra_applications: [:lager, :logger, :amqp, :runtime_tools, :numerix, :gen_stage, :flow]
+      extra_applications: [:lager, :logger, :amqp, :runtime_tools]
     ]
   end
 
