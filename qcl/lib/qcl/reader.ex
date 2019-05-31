@@ -12,7 +12,7 @@ defmodule Qcl.Reader do
   def init(_) do
     {:ok, pid} = Circuits.UART.start_link
     port = port()
-    Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
+    Circuits.UART.open(pid, port, speed: 115200, parity: :odd, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid, port: port, listeners: []}}
   end
 
