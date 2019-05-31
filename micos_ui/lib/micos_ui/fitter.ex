@@ -27,7 +27,7 @@ defmodule MicosUi.Fitter do
     predictor = Linear.new(minutes, y)
                 |> Linear.fit
     r_square = Linear.score(predictor)
-    [intercept, slope] = predictor.coefficents
+    [intercept, slope] = predictor.coefficients
     %{intercept: intercept, slope: slope, r2: r_square}
   end
 
