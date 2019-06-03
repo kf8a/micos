@@ -98,9 +98,15 @@ defmodule MicosUiWeb.DataView do
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
-    seconds = abs(rem(trunc(payload.minute * 60), 60))
-    minutes = trunc(payload.minute)
-    {:noreply, assign(socket, datum: payload, duration: "#{minutes}:#{seconds}")}
+    status = MicosUi.Sampler.status()
+
+    seconds = abs(rem(trunc(payload.minute * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
+    minutes = abs(trunc(payload.minute))
+    sign = case status.waiting  do
+      true -> "-"
+      _ -> " "
+    end
+    {:noreply, assign(socket, datum: payload, duration: "#{sign}#{minutes}:#{seconds}")}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}} = payload, topic: "data"}, %Phoenix.LiveView.Socket{} = socket) do
