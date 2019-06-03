@@ -9,6 +9,7 @@ defmodule MicosUi.Points.Point do
     field :n2o, :float
     field :co2, :float
     field :ch4, :float
+    field :h2o_ppm, :float
     field :minute, :float
     belongs_to :sample, Sample
 
