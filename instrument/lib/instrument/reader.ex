@@ -57,6 +57,11 @@ defmodule Instrument.Reader do
     {:noreply, state}
   end
 
+  def handle_info(msg, state) do
+    Logger.info "Unexpected message: #{inspect msg}"
+    {:noreply, state}
+  end
+
   def handle_cast({:register, pid}, state) do
     listeners = state[:listeners] ++ [ pid ]
     {:noreply, Map.put(state, :listeners, listeners)}
@@ -66,4 +71,5 @@ defmodule Instrument.Reader do
     listeners = List.delete(state[:listeners],   pid)
     {:noreply, Map.put(state, :listeners, listeners)}
   end
+
 end
