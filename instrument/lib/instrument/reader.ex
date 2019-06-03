@@ -32,7 +32,7 @@ defmodule Instrument.Reader do
 
   def handle_info(:tick, state) do
     number = :rand.uniform(1000)/1000
-    datum = %Instrument{datetime: DateTime.utc_now(), ch4: number, n2o: number, co2: number}
+    datum = %Instrument{datetime: DateTime.utc_now(), ch4: number, n2o: number, co2: number, h2o: number}
     broadcast(datum, state[:listeners])
     Process.send_after(__MODULE__, :tick, 1_000)
     {:noreply, state}
@@ -46,7 +46,7 @@ defmodule Instrument.Reader do
     licor = state[:licor]
     state = case licor do
       %Licor{} ->
-        datum = %Instrument{datetime: qcl.datetime, ch4: qcl.ch4_ppm_dry, n2o: qcl.n2o_ppb_dry, co2: licor.co2}
+        datum = %Instrument{datetime: qcl.datetime, ch4: qcl.ch4_ppm_dry, n2o: qcl.n2o_ppb_dry, co2: licor.co2, h2o: qcl.h2o_ppm }
         Instrument.Logger.save(datum)
         broadcast(datum, state[:listeners])
         Map.put(state, :data, datum)
