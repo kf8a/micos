@@ -26,7 +26,7 @@ defmodule MicosUi.Fitter do
   def flux(minutes,y) when length(minutes) > 2 do
     predictor = Linear.new(minutes, y)
                 |> Linear.fit
-    r_square = Linear.score(predictor)
+    {:ok, r_square} = Linear.score(predictor)
     [intercept, slope] = predictor.coefficients
     %{intercept: intercept, slope: slope, r2: r_square}
   end
