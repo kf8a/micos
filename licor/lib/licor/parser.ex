@@ -35,8 +35,14 @@ defmodule Licor.Parser do
   end
 
   defp extract(doc, path) do
-    Exml.get(doc, path)
-    |> String.to_float
+    string = Exml.get(doc, path)
+
+    case Float.parse(string) do
+      {value, _} ->
+        value
+      :error ->
+        raise "unparsable #{string}"
+    end
   end
 
 end

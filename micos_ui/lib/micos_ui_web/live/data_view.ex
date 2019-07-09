@@ -84,7 +84,6 @@ defmodule MicosUiWeb.DataView do
 
   def handle_event("validate",  %{"sample" => params}, socket) do
     status = MicosUi.Sampler.status
-    IO.inspect status
     sample = status[:sample]
     changeset = sample
                 |> Sample.changeset(params)
