@@ -6,7 +6,8 @@ defmodule Qcl.Reader do
   alias Qcl.Parser
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{port: port()}, name: __MODULE__)
+    port = port()
+    GenServer.start_link(__MODULE__, %{port: port}, name: __MODULE__)
   end
 
   def init(%{port: port}) do
@@ -16,10 +17,18 @@ defmodule Qcl.Reader do
   end
 
   def port() do
-    case port = System.get_env("QCL_PORT") do
-      nil -> "ttyQCL"
-      _ -> port
-    end
+    {port, _} = Circuits.UART.enumerate
+                |> Enum.find("QCL_PORT", fn({_port, value}) -> correct_port?(value) end)
+
+    port
+  end
+
+  def correct_port?(%{serial_number: number}) do
+    number ==  "FTB3L9SF"
+  end
+
+  def correct_port?(%{}) do
+    false
   end
 
   def register(client_pid) do
