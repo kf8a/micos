@@ -6,12 +6,11 @@ defmodule Licor.Reader do
   alias Licor.Parser
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+    GenServer.start_link(__MODULE__, %{port: get_port()}, name: __MODULE__)
   end
 
-  def init(_) do
+  def init(%{port: port}) do
     {:ok, pid} = Circuits.UART.start_link
-    port = get_port()
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid, port: port, listeners: []}}
   end
