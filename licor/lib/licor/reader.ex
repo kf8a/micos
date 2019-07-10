@@ -25,11 +25,11 @@ defmodule Licor.Reader do
 
   def enumerate() do
     Circuits.UART.enumerate
-    |> Enum.find(fn({port, value}) -> correct_port?(value) end)
+    |> Enum.find("LICOR_PORT", fn({port, value}) -> correct_port?(value) end)
   end
 
   def correct_port?(%{serial_number: number}) do
-    match?(number,"FTY3ZUKK")
+    match?(number, "FTY3ZUKK")
   end
 
   def correct_port?(%{}) do
