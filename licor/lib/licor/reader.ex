@@ -6,30 +6,26 @@ defmodule Licor.Reader do
   alias Licor.Parser
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{port: get_port()}, name: __MODULE__)
+    port = get_port()
+    GenServer.start_link(__MODULE__, %{port: port}, name: __MODULE__)
   end
 
   def init(%{port: port}) do
+    IO.inspect port
     {:ok, pid} = Circuits.UART.start_link
     Circuits.UART.open(pid, port, speed: 9600, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
     {:ok, %{uart: pid, port: port, listeners: []}}
   end
 
   def get_port() do
-    case port = System.get_env("LICOR_PORT") do
-      nil ->
-        "ttyLICOR"
-      _ -> port
-    end
-  end
+    {port, _} = Circuits.UART.enumerate
+                |> Enum.find("LICOR_PORT", fn({port, value}) -> correct_port?(value) end)
 
-  def enumerate() do
-    Circuits.UART.enumerate
-    |> Enum.find("LICOR_PORT", fn({port, value}) -> correct_port?(value) end)
+    port
   end
 
   def correct_port?(%{serial_number: number}) do
-    match?(number, "FTY3ZUKK")
+    number ==  "FTY3ZUKK"
   end
 
   def correct_port?(%{}) do
