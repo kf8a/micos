@@ -19,7 +19,7 @@ defmodule Licor.Reader do
 
   def get_port() do
     {port, _} = Circuits.UART.enumerate
-                |> Enum.find("LICOR_PORT", fn({port, value}) -> correct_port?(value) end)
+                |> Enum.find("LICOR_PORT", fn({_port, value}) -> correct_port?(value) end)
 
     port
   end
