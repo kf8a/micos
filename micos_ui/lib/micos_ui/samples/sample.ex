@@ -30,7 +30,7 @@ defmodule MicosUi.Samples.Sample do
     sample
     |> cast(attrs, [:plot_id, :height1, :height2, :height3,
       :n2o_slope, :n2o_r2, :co2_slope, :co2_r2, :ch4_slope, :ch4_r2,
-      :air_temperature, :soil_temperature, :deleted,
+      :air_temperature, :soil_temperature, :moisture, :deleted,
       :started_at, :finished_at ])
      |> validate_required([:plot_id, :height1, :height2, :height3])
   end
