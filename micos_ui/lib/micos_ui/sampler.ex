@@ -8,8 +8,9 @@ defmodule MicosUi.Sampler do
 
   require Logger
 
+  # sampling: should be one of :off, :waiting, or :sampling
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{waiting: false, interval: 0, sampling: false, data: [], sample: %Sample{} }, name: MicosUi.Sampler)
+    GenServer.start_link(__MODULE__, %{interval: 0, sampling: :off, data: [], sample: %Sample{} }, name: MicosUi.Sampler)
   end
 
   def init(state) do
@@ -71,7 +72,7 @@ defmodule MicosUi.Sampler do
     {:noreply, Map.put(state, :sample, sample)}
   end
 
-  def handle_cast(:abort, %{sampling: true} = state) do
+  def handle_cast(:abort, %{sampling: :sampling} = state) do
     unsubscribe()
     sample = state[:sample]
     case Samples.update_sample(sample, %{finished_at: DateTime.utc_now()}) do
@@ -88,17 +89,16 @@ defmodule MicosUi.Sampler do
     end
 
     state = state
-            |> Map.put(:sampling, false)
-            |> Map.put(:waiting, false)
+            |> Map.put(:sampling, :off)
             |> Map.put(:sample, %Sample{})
     {:noreply, state}
   end
 
   def handle_cast(:abort, state) do
-    {:noreply, Map.put(state, :waiting, false)}
+    {:noreply, Map.put(state, :sampling, :off)}
   end
 
-  def handle_cast(:stop, %{sampling: true} = state) do
+  def handle_cast(:stop, %{sampling: :sampling} = state) do
     unsubscribe()
 
     sample = state[:sample]
@@ -113,14 +113,13 @@ defmodule MicosUi.Sampler do
     save_sample_flux(sample, state)
 
     state = state
-            |> Map.put(:sampling, false)
-            |> Map.put(:waiting, false)
+            |> Map.put(:sampling, :off)
             |> Map.put(:sample, %Sample{})
     {:noreply, state}
   end
 
   def handle_cast(:stop, state) do
-    {:noreply, Map.put(state, :waiting, false)}
+    {:noreply, Map.put(state, :sampling, :off)}
   end
 
   def handle_cast(:start, state) do
@@ -128,7 +127,7 @@ defmodule MicosUi.Sampler do
     Process.send_after(__MODULE__, :tick, 1_000)
 
     state = state
-            |> Map.put(:waiting, true)
+            |> Map.put(:sampling, :waiting)
             |> Map.put(:sample_start_time, DateTime.utc_now())
 
     {:noreply, state}
@@ -147,25 +146,26 @@ defmodule MicosUi.Sampler do
   end
 
 
-  def handle_info(:tick, %{waiting: true}=state) do
+  # Countdown clock
+  def handle_info(:tick, %{sampling: :waiting}=state) do
     Process.send_after(__MODULE__, :tick, 1_000)
     datum = %Instrument{ minute: DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 }
     Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
-  def handle_info(:tick, %{waiting: false}=state) do
+  def handle_info(:tick, state) do
     {:noreply, state}
   end
 
+  # start sampling
   def handle_info(:sample, state) do
     subscribe()
     now = DateTime.utc_now
     {:ok, sample} = Samples.update_sample(state[:sample], %{started_at: now})
 
     state = state
-            |> Map.put(:sampling, true)
-            |> Map.put(:waiting, false)
+            |> Map.put(:sampling, :sampliing)
             |> Map.put(:data, [])
             |> Map.put(:sample_start_time, now)
             |> Map.put(:sample, sample)
@@ -177,7 +177,7 @@ defmodule MicosUi.Sampler do
   end
 
   # We are sampling and collecting data
-  def handle_info(%Instrument{} = datum, %{sampling: true} = state) do
+  def handle_info(%Instrument{} = datum, %{sampling: :sampling} = state) do
     start_time = state[:sample].started_at
     new_datum = prep_datum(datum, start_time)
     data =  [new_datum | state[:data]]
@@ -215,7 +215,7 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
-  def handle_info(%Instrument{} = datum, %{sampling: false} = state) do
+  def handle_info(%Instrument{} = datum, %{sampling: :waiting} = state) do
     Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
