@@ -2,7 +2,7 @@ defmodule MicosUi.Logger do
   require Logger
 
   def save(msg) do
-    Task.start(__MODULE__, :write_to_rabbitmq, [msg])
+    # Task.start(__MODULE__, :write_to_rabbitmq, [msg])
   end
 
   @queue "samples"
