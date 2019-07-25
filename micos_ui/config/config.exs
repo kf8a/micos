@@ -10,7 +10,6 @@ use Mix.Config
 config :micos_ui,
   ecto_repos: [MicosUi.Repo]
 
-
 # Configures the endpoint
 config :micos_ui, MicosUiWeb.Endpoint,
   url: [host: "localhost"],
@@ -20,11 +19,6 @@ config :micos_ui, MicosUiWeb.Endpoint,
   live_view: [
     signing_salt: "lRsZg5udV88srXmmGPkIxWHR71ODBLDHYgnjKB7B0/6+WxPbexPFw06Uc++DA+IV"
   ]
-
-# silence lager logger
-config :lager,
-  error_logger_redirect: false,
-  handlers: [level: :critical]
 
 # Configures Elixir's Logger
 config :logger, :console,
