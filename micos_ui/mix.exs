@@ -19,7 +19,7 @@ defmodule MicosUi.MixProject do
   def application do
     [
       mod: {MicosUi.Application, []},
-      extra_applications: [:lager, :logger, :amqp, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
@@ -39,7 +39,7 @@ defmodule MicosUi.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.11"},
-      {:amqp, "~> 1.2"},
+      # {:amqp, "~> 1.2"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
