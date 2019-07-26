@@ -128,7 +128,6 @@ defmodule MicosUi.Sampler do
 
   def handle_cast(:start, state) do
     Process.send_after(self(), :sample, 120_000)
-    Process.send_after(__MODULE__, :tick, 1_000)
 
     subscribe()
 
@@ -149,15 +148,6 @@ defmodule MicosUi.Sampler do
 
   def prep_datum(%Instrument{} = datum, start_time) do
     Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
-  end
-
-
-  # Countdown clock
-  def handle_info(:tick, %{sampling: :waiting}=state) do
-    Process.send_after(__MODULE__, :tick, 1_000)
-    datum = %Instrument{ minute: DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 }
-    Endpoint.broadcast_from(self(), "data", "new", datum)
-    {:noreply, state}
   end
 
   def handle_info(:tick, state) do
@@ -208,8 +198,7 @@ defmodule MicosUi.Sampler do
 
   # we are listening and waiting to start
   def handle_info(%Instrument{} = datum, %{sampling: :waiting} = state) do
-    # minute  = DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 }
-    new_datum = prep_datum(datum, state[:sample_start_time])
+    new_datum = Map.put(datum, :minute, DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 )
     Endpoint.broadcast_from(self(), "data", "new", new_datum)
     {:noreply, state}
   end
