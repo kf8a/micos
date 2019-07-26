@@ -169,7 +169,7 @@ defmodule MicosUi.Sampler do
     {:ok, sample} = Samples.update_sample(state[:sample], %{started_at: now})
 
     state = state
-            |> Map.put(:sampling, :sampliing)
+            |> Map.put(:sampling, :sampling)
             |> Map.put(:data, [])
             |> Map.put(:sample_start_time, now)
             |> Map.put(:sample, sample)
