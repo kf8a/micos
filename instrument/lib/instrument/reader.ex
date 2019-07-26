@@ -47,7 +47,7 @@ defmodule Instrument.Reader do
     state = case licor do
       %Licor{} ->
         datum = %Instrument{datetime: qcl.datetime, ch4: qcl.ch4_ppm_dry, n2o: qcl.n2o_ppb_dry, co2: licor.co2, h2o: qcl.h2o_ppm }
-        Instrument.Logger.save(datum)
+        # Instrument.Logger.save(datum)
         broadcast(datum, state[:listeners])
         Map.put(state, :data, datum)
       _ ->
