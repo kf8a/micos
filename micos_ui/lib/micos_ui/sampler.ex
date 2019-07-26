@@ -182,7 +182,7 @@ defmodule MicosUi.Sampler do
 
   # We are sampling and collecting data
   def handle_info(%Instrument{} = datum, %{sampling: :sampling} = state) do
-    new_datum = prep_datum(datum, state[:sample_start_time)
+    new_datum = prep_datum(datum, state[:sample_start_time])
     data =  [new_datum | state[:data]]
 
     # every 30 seconds or so
