@@ -13,6 +13,7 @@ defmodule MicosUi.Application do
       MicosUiWeb.Endpoint,
       # Start Sampler
       MicosUi.Sampler,
+      MicosUi.DataPump,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
