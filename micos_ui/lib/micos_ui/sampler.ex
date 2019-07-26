@@ -182,8 +182,7 @@ defmodule MicosUi.Sampler do
 
   # We are sampling and collecting data
   def handle_info(%Instrument{} = datum, %{sampling: :sampling} = state) do
-    start_time = state[:sample].started_at
-    new_datum = prep_datum(datum, start_time)
+    new_datum = prep_datum(datum, state[:sample_start_time)
     data =  [new_datum | state[:data]]
 
     # every 30 seconds or so
@@ -206,6 +205,11 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
+  # def handle_info(%Instrument{} = datum, state) do
+  #   Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime))
+  #   {:noreply, state}
+  # end
+
   def handle_info(%{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, state) do
 
     state = state
@@ -214,11 +218,6 @@ defmodule MicosUi.Sampler do
             |> Map.put(:ch4_flux, ch4_flux)
 
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
-    {:noreply, state}
-  end
-
-  def handle_info(%Instrument{} = datum, state) do
-    Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime))
     {:noreply, state}
   end
 
