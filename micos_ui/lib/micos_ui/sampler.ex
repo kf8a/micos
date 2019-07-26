@@ -130,6 +130,8 @@ defmodule MicosUi.Sampler do
     Process.send_after(self(), :sample, 120_000)
     Process.send_after(__MODULE__, :tick, 1_000)
 
+    subscribe()
+
     state = state
             |> Map.put(:sampling, :waiting)
             |> Map.put(:sample_start_time, DateTime.utc_now())
@@ -164,7 +166,6 @@ defmodule MicosUi.Sampler do
 
   # start sampling
   def handle_info(:sample, state) do
-    subscribe()
     now = DateTime.utc_now
     {:ok, sample} = Samples.update_sample(state[:sample], %{started_at: now})
 
@@ -205,10 +206,10 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
-  # def handle_info(%Instrument{} = datum, state) do
-  #   Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime))
-  #   {:noreply, state}
-  # end
+  def handle_info(%Instrument{} = datum, state) do
+    Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime))
+    {:noreply, state}
+  end
 
   def handle_info(%{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, state) do
 
