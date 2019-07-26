@@ -26,7 +26,6 @@
   </label>
   </div>
 
-  <%= @sampling %>
   <button phx-click="sample", phx_disable_with: "sampling..",
     <%= if !@changeset.valid? || @sampling != :off do %> disabled <% end %>  >Start</button>
   <button phx-click="stop", phx_disable_with: "next sample...",
