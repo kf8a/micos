@@ -206,8 +206,16 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
+  # we are listening and waiting to start
+  def handle_info(%Instrument{} = datum, %{sampling: :waiting} = state) do
+    # minute  = DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 }
+    new_datum = prep_datum(datum, state[:sample_start_time])
+    Endpoint.broadcast_from(self(), "data", "new", new_datum)
+    {:noreply, state}
+  end
+
   def handle_info(%Instrument{} = datum, state) do
-    Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime))
+    Endpoint.broadcast_from(self(), "data", "new", datum)
     {:noreply, state}
   end
 
