@@ -37,7 +37,6 @@ defmodule MicosUi.Sampler do
     GenServer.cast(__MODULE__, {:sample, sample})
   end
 
-
   def save_sample_flux(%Sample{} = sample, %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
                                             co2_flux: %{slope: co2_flux, r2: co2_r2},
                                             n2o_flux: %{slope: n2o_flux, r2: n2o_r2}}) do
@@ -55,6 +54,21 @@ defmodule MicosUi.Sampler do
 
   # If save_sample is called with anything else it will do nothing
   def save_sample_flux(%Sample{} = _, _ ) do
+  end
+
+  def abort_sample(sample) do
+    case Samples.update_sample(sample, %{finished_at: DateTime.utc_now()}) do
+      {:ok, sample} ->
+        sample
+      {:error, changeset} ->
+        Logger.warn "failed to update sample with finished: #{inspect changeset}"
+    end
+    case Samples.update_sample(sample, %{deleted: true}) do
+      {:ok, sample} ->
+        sample
+      {:error, changeset} ->
+        Logger.warn "failed to update sample with deleted: #{inspect changeset}"
+    end
   end
 
   def compute_fluxes(data, pid) do
@@ -75,18 +89,7 @@ defmodule MicosUi.Sampler do
   def handle_cast(:abort, %{sampling: :sampling} = state) do
     unsubscribe()
     sample = state[:sample]
-    case Samples.update_sample(sample, %{finished_at: DateTime.utc_now()}) do
-      {:ok, sample} ->
-        sample
-      {:error, changeset} ->
-        Logger.warn "failed to update sample with finished: #{inspect changeset}"
-    end
-    case Samples.update_sample(sample, %{deleted: true}) do
-      {:ok, sample} ->
-        sample
-      {:error, changeset} ->
-        Logger.warn "failed to update sample with deleted: #{inspect changeset}"
-    end
+    Task.start(fn() -> abort_sample(sample) end)
 
     state = state
             |> Map.put(:sampling, :off)
@@ -110,7 +113,8 @@ defmodule MicosUi.Sampler do
         Logger.warn "failed to save sample while stopping #{inspect changeset}"
     end
 
-    save_sample_flux(sample, state)
+    # handle the saving in a separate process
+    Task.start(fn() ->  save_sample_flux(sample, state) end)
 
     state = state
             |> Map.put(:sampling, :off)
@@ -186,10 +190,8 @@ defmodule MicosUi.Sampler do
     # compute the current fluxes
     interval = rem(state[:interval] + 1, 30)
     if interval == 0 do
-
       Task.start(__MODULE__, :compute_fluxes, [data, self()])
     end
-
 
     # save data to db
     MicosUi.Points.create_point(Map.put(Map.from_struct(new_datum), :sample_id, state[:sample].id))
@@ -215,8 +217,8 @@ defmodule MicosUi.Sampler do
     {:noreply, state}
   end
 
-  def handle_info(%Instrument{} = datum, %{sampling: :waiting} = state) do
-    Endpoint.broadcast_from(self(), "data", "new", datum)
+  def handle_info(%Instrument{} = datum, state) do
+    Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime)
     {:noreply, state}
   end
 
