@@ -218,7 +218,7 @@ defmodule MicosUi.Sampler do
   end
 
   def handle_info(%Instrument{} = datum, state) do
-    Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime)
+    Endpoint.broadcast_from(self(), "data", "new", prep_datum(datum, datum.datetime))
     {:noreply, state}
   end
 
