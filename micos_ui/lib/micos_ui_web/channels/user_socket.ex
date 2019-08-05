@@ -3,6 +3,7 @@ defmodule MicosUiWeb.UserSocket do
 
   ## Channels
   # channel "room:*", MicosUiWeb.RoomChannel
+  channel "data:*", MicosUiWeb.DataChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

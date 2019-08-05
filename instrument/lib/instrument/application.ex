@@ -10,7 +10,7 @@ defmodule Instrument.Application do
     children = [
       Licor.Reader,
       Qcl.Reader,
-      { Instrument.Reader, false}
+      { Instrument.Reader, Application.get_env(:instrument, :debug)}
 
       # Starts a worker by calling: Instrument.Worker.start_link(arg)
       # {Instrument.Worker, arg}
