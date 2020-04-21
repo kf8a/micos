@@ -18,7 +18,7 @@ defmodule Qcl.Reader do
 
   def port() do
     {port, _} = Circuits.UART.enumerate
-                |> Enum.find("QCL_PORT", fn({_port, value}) -> correct_port?(value) end)
+                |> Enum.find({"QCL_PORT", ''}, fn({_port, value}) -> correct_port?(value) end)
 
     port
   end

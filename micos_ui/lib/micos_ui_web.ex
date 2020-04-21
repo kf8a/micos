@@ -24,6 +24,7 @@ defmodule MicosUiWeb do
       import Plug.Conn
       import MicosUiWeb.Gettext
       alias MicosUiWeb.Router.Helpers, as: Routes
+      import Phoenix.LiveView.Controller
     end
   end
 
@@ -41,7 +42,7 @@ defmodule MicosUiWeb do
 
       import MicosUiWeb.ErrorHelpers
       import MicosUiWeb.Gettext
-      import Phoenix.LiveView, only: [live_render: 2, live_render: 3]
+      import Phoenix.LiveView.Helpers
 
       alias MicosUiWeb.Router.Helpers, as: Routes
     end

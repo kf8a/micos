@@ -15,7 +15,7 @@ config :micos_ui, MicosUiWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "ifNM7JLA0w7uAFg+UdYmwiERth2xDEs1Hdfr4CWBVUhVJh2qNXkl5jAOJGfSQbv/",
   render_errors: [view: MicosUiWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: MicosUi.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub_server: MicosUi.PubSub,
   live_view: [
     signing_salt: "lRsZg5udV88srXmmGPkIxWHR71ODBLDHYgnjKB7B0/6+WxPbexPFw06Uc++DA+IV"
   ]
