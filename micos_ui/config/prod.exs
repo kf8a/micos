@@ -70,7 +70,8 @@ config :logger, level: :warn
 #     config :micos_ui, MicosUiWeb.Endpoint, server: true
 #
 # Note you can't rely on `System.get_env/1` when using releases.
-# See the releases documentation accordingly.
+
+config :instrument, :debug,  false
 
 # Finally import the config/prod.secret.exs which should be versioned
 # separately.
