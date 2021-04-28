@@ -14,6 +14,7 @@ defmodule MicosUi.Application do
       # Start Sampler
       MicosUi.Sampler,
       MicosUi.DataPump,
+      MicosUi.Uploader,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

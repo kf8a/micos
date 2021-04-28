@@ -19,7 +19,8 @@ defmodule MicosUi.Samples.Sample do
     field :air_temperature, :float
     field :soil_temperature, :float
     field :moisture, :float
-    field :deleted, :boolean
+    field :deleted, :boolean, default: false
+    field :uploaded, :boolean, default: false
     belongs_to :plot, Plot
 
     timestamps()

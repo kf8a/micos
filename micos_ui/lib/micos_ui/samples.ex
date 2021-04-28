@@ -22,6 +22,11 @@ defmodule MicosUi.Samples do
     Repo.all(Sample)
   end
 
+  def list_samples_to_upload() do
+    query = from s in MicosUi.Samples.Sample, where: s.uploaded == false
+    Repo.all(query)
+  end
+
   def get_plots() do
     Repo.all(Plot)
   end

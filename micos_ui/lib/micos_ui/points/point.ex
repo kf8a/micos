@@ -11,6 +11,7 @@ defmodule MicosUi.Points.Point do
     field :ch4, :float
     field :h2o_ppm, :float
     field :minute, :float
+    field :uploaded, :boolean, default: false
     belongs_to :sample, Sample
 
     timestamps()

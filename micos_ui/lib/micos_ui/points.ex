@@ -14,5 +14,11 @@ defmodule MicosUi.Points do
     |> Repo.insert()
   end
 
+  def list_points_to_upload() do
+    query = from s in MicosUi.Points.Point,
+      where: s.uploaded == false,
+      limit: 10_000
+    Repo.all(query)
+  end
 
 end
