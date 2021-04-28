@@ -59,7 +59,7 @@ config :micos_ui, MicosUiWeb.Endpoint,
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
-config :logger, :level, :debug
+config :logger, :level, :info
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
@@ -70,4 +70,4 @@ config :phoenix, :plug_init_mode, :runtime
 
 config :instrument, :debug,  false
 
-import_config "dev.secret.exs"
+import_config "prod.secret.exs"
