@@ -17,7 +17,7 @@ config :micos_ui, MicosUiWeb.Endpoint,
   server: true,
   root: ".",
   version: Application.spec(:micos_ui, :vsn),
-  check_origin: ["http://192.168.8.153:4000", "http://192.168.8.154:4000", "http://192.168.120.16:4000"]
+  check_origin: ["http://192.168.8.153:4000", "http://192.168.8.154:4000", "http://192.168.120.16:4000","http://100.69.92.33:4000"]
 
 
 # Do not print debug messages in production

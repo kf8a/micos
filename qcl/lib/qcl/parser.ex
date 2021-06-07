@@ -67,10 +67,14 @@ defmodule Qcl.Parser do
   end
 
   def extract(data, index) do
-    {:ok, value } = Enum.fetch(data, index)
-    value
-    |> String.trim
-    |> String.to_float
+    case Enum.fetch(data, index) do
+      {:ok, value } ->
+          value
+          |> String.trim
+          |> String.to_float
+      _ ->
+        :error
+    end
   end
 end
 
