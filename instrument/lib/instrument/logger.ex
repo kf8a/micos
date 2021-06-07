@@ -2,7 +2,7 @@ defmodule Instrument.Logger do
 
   require Logger
 
-  def save(msg) do
+  def save(_msg) do
     # Task.start(__MODULE__, :save_to_disk, [msg])
     # Task.start(__MODULE__, :write_to_rabbitmq, [msg])
   end
