@@ -10,6 +10,8 @@ defmodule MicosUi.Points.Point do
     field :co2, :float
     field :ch4, :float
     field :h2o_ppm, :float
+    field :ambient_temperature_c, :float
+    field :gas_temperature_c, :float
     field :minute, :float
     field :uploaded, :boolean, default: false
     belongs_to :sample, Sample
@@ -20,7 +22,9 @@ defmodule MicosUi.Points.Point do
   @doc false
   def changeset(point, attrs) do
     point
-    |> cast(attrs, [:sample_id, :n2o, :co2, :ch4, :datetime, :minute])
+    |> cast(attrs, [:sample_id, :n2o, :co2, :ch4,
+      :ambient_temperature_c, :gas_temperature_c,
+      :datetime, :minute])
     |> validate_required([:sample_id, :datetime, :minute])
   end
 end

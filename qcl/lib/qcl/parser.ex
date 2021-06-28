@@ -21,7 +21,9 @@ defmodule Qcl.Parser do
         %Qcl{instrument_datetime: datetime, datetime: DateTime.utc_now,
           ch4_ppm: ch4_ppm(data), h2o_ppm: h2o_ppm(data), n2o_ppm: n2o_ppm(data),
           n2o_ppm_dry: n2o_ppm_dry(data), ch4_ppm_dry: ch4_ppm_dry(data),
-          n2o_ppb_dry: n2o_ppm_dry(data)*1000}
+          n2o_ppb_dry: n2o_ppm_dry(data)*1000, gas_temperature_c: gas_temperature_c(data),
+          ambient_temperature_c: ambient_temperature_c(data)
+        }
     end
   end
 
@@ -64,6 +66,14 @@ defmodule Qcl.Parser do
 
   defp ch4_ppm_dry(data) do
     extract(data, 9)
+  end
+
+  defp ambient_temperature_c(data) do
+    extract(data, 13)
+  end
+
+  defp gas_temperature_c(data) do
+    extract(data, 15)
   end
 
   def extract(data, index) do

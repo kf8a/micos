@@ -24,7 +24,7 @@ defmodule Instrument.MixProject do
     [
       # {:amqp, "~> 1.2"},
       {:qcl, path: "../qcl"},
-      {:licor, path: "../licor"},
+      {:licor, github: "kf8a/licor"},
     ]
   end
 end
