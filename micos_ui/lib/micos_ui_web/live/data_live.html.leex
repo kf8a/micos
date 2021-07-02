@@ -1,6 +1,10 @@
 <div class="container">
   <%= f = form_for @changeset, "#", [phx_change: :validate] %>
   <label>
+    Sample Group: <%= select f, :study_id, @studies %>
+  </label>
+
+  <label>
     Plot: <%= select f, :plot_id, @plots %>
   </label>
   <div class="row">

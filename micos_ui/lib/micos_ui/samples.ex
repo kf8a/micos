@@ -37,6 +37,12 @@ defmodule MicosUi.Samples do
     # |> Enum.map(fn [name,key] -> %{key: key, option: name} end)
   end
 
+  def get_studies_for_select() do
+    query = from p in MicosUi.Samples.Study, select: {p.name, p.id}
+    Repo.all(query)
+    # |> Enum.map(fn [name,key] -> %{key: key, option: name} end)
+  end
+
   @doc """
   Gets a single sample.
 

@@ -11,6 +11,7 @@ defmodule MicosUiWeb.DataLive do
   def mount(_params, _session, socket) do
     status = MicosUi.Sampler.status()
     plots = Samples.get_plots_for_select()
+    studies = Samples.get_studies_for_select()
 
     fluxes = round5(flux_to_map(status))
 
@@ -23,9 +24,11 @@ defmodule MicosUiWeb.DataLive do
         sampling: status[:sampling],
         changeset: Samples.change_sample(sample),
         plots: plots,
+        studies: studies,
         datum: %Instrument{}, duration: "0:0",
         n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
-        ch4_flux: '', ch4_r2: ''
+        ch4_flux: '', ch4_r2: '',
+        fluxes: fluxes
       )}
   end
 
@@ -38,7 +41,7 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def flux_to_map(msg) do
-    Logger.error "flux_to_map called with: #{inspect(msg)}"
+    Logger.warn "flux_to_map called with: #{inspect(msg)}"
     %{}
   end
 
@@ -56,6 +59,7 @@ defmodule MicosUiWeb.DataLive do
     end
   end
 
+  @impl true
   def handle_event("sample", _value, socket) do
     MicosUi.Sampler.start()
     MicosUi.Logger.save(%{event: "start", datetime: DateTime.utc_now})
@@ -83,6 +87,7 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
+    IO.inspect params
     status = MicosUi.Sampler.status
     sample = status[:sample]
     changeset = sample
@@ -96,6 +101,7 @@ defmodule MicosUiWeb.DataLive do
     {:noreply, assign(socket, sampling: status[:sampling], changeset: changeset) }
   end
 
+  @impl true
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
     status = MicosUi.Sampler.status()
 
