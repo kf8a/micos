@@ -10,6 +10,7 @@ defmodule MicosUi.Application do
     children = [
       # Start the endpoint when the application starts
       MicosUi.Repo,
+      {Phoenix.PubSub, name: MicosUi.PubSub},
       MicosUiWeb.Endpoint,
       # Start Sampler
       MicosUi.Sampler,

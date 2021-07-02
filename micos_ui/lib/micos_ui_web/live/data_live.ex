@@ -1,5 +1,5 @@
-defmodule MicosUiWeb.DataView do
-  use Phoenix.LiveView
+defmodule MicosUiWeb.DataLive do
+  use MicosUiWeb, :live_view
 
   alias MicosUiWeb.Endpoint
   alias MicosUi.Samples
@@ -7,11 +7,8 @@ defmodule MicosUiWeb.DataView do
 
   require Logger
 
-  def render(assigns) do
-    MicosUiWeb.PageView.render("data_view.html", assigns)
-  end
-
-  def mount(_session, socket) do
+  @impl true
+  def mount(_params, _session, socket) do
     status = MicosUi.Sampler.status()
     plots = Samples.get_plots_for_select()
 
@@ -20,14 +17,16 @@ defmodule MicosUiWeb.DataView do
     Endpoint.subscribe("data")
     sample = status[:sample]
 
-    live = %{sampling: status[:sampling],
-      changeset: Samples.change_sample(sample), plots: plots,
-      datum: %Instrument{}, duration: "0:0",
-      n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
-      ch4_flux: '', ch4_r2: ''}
-
-
-    {:ok, assign(socket, Map.merge(live, fluxes))}
+    # {:ok, assign(socket, Map.merge(live, fluxes))}
+    {:ok,
+      assign(socket,
+        sampling: status[:sampling],
+        changeset: Samples.change_sample(sample),
+        plots: plots,
+        datum: %Instrument{}, duration: "0:0",
+        n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
+        ch4_flux: '', ch4_r2: ''
+      )}
   end
 
   def flux_to_map( %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},

@@ -5,7 +5,7 @@ defmodule MicosUiWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
-    plug Phoenix.LiveView.Flash
+    plug :fetch_live_flash
 
     plug :protect_from_forgery
     plug :put_secure_browser_headers
@@ -18,7 +18,7 @@ defmodule MicosUiWeb.Router do
   scope "/", MicosUiWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live "/", DataLive, :index
     resources "/samples", SampleController
   end
 

@@ -33,9 +33,10 @@ defmodule MicosUi.MixProject do
   defp deps do
     [
       {:instrument, path: "../instrument"},
-      {:phoenix, "~> 1.4.0"},
-			{:phoenix_pubsub, "~> 1.1"},
+      {:phoenix, "~> 1.5"},
+      {:phoenix_pubsub, "~> 2.0"},
 			{:phoenix_ecto, "~> 4.0"},
+      {:gen_stage, "~> 1.0"},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.11"},
@@ -47,7 +48,7 @@ defmodule MicosUi.MixProject do
       {:learn_kit, "~> 0.1.6"},
       {:benchee, "~> 1.0", only: :dev},
       {:httpoison, "~> 1.8"},
-      {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"}
+      {:phoenix_live_view, "~> 0.15.7"},
     ]
   end
 end
