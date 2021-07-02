@@ -6,28 +6,30 @@ defmodule Qcl.Reader do
   alias Qcl.Parser
 
   def start_link(_) do
-    port = port()
-    GenServer.start_link(__MODULE__, %{port: port}, name: __MODULE__)
+    GenServer.start_link(__MODULE__, %{port_serial: "FTB3L9SF"}, name: __MODULE__)
   end
 
-  def init(%{port: port}) do
+  def init(%{port_serial: serial_number}) do
     {:ok, pid} = Circuits.UART.start_link
-    Circuits.UART.open(pid, port, speed: 9600, parity: :none, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
-    {:ok, %{uart: pid, port: port, listeners: []}}
+    case find_port(Circuits.UART.enumerate, serial_number) do
+      {port, _ } ->
+        Circuits.UART.open(pid, port, speed: 9600, parity: :none, framing: {Circuits.UART.Framing.Line, separator: "\r\n"})
+        {:ok, %{uart: pid, port: port, listeners: []}}
+      nil ->
+        {:ok, %{uart: pid, port: nil, listeners: []}}
+    end
   end
 
-  def port() do
-    {port, _} = Circuits.UART.enumerate
-                |> Enum.find("QCL_PORT", fn({_port, value}) -> correct_port?(value) end)
-
-    port
+  def find_port(ports, serial_number) do
+    ports
+    |> Enum.find(fn({_port, value}) -> correct_port?(value, serial_number) end)
   end
 
-  def correct_port?(%{serial_number: number}) do
-    number ==  "FTB3L9SF"
+  def correct_port?(%{serial_number: number}, serial_number) do
+    number ==  serial_number
   end
 
-  def correct_port?(%{}) do
+  def correct_port?(%{}, _serial_port) do
     false
   end
 

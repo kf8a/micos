@@ -12,7 +12,6 @@ defmodule Instrument.Reader do
       true ->
         Process.send_after(__MODULE__, :tick, 1_000)
       false ->
-        Licor.Reader.register(self())
         Qcl.Reader.register(self())
     end
     {:ok, state}
@@ -43,7 +42,8 @@ defmodule Instrument.Reader do
   end
 
   def handle_info(%Qcl{} = qcl, state) do
-    licor = state[:licor]
+    # licor = state[:licor]
+    licor = Licor.Reader.current_value()
     state = case licor do
       %Licor{} ->
         datum = %Instrument{datetime: qcl.datetime, ch4: qcl.ch4_ppm_dry, n2o: qcl.n2o_ppb_dry, co2: licor.co2, h2o: qcl.h2o_ppm }

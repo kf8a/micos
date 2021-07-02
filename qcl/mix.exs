@@ -22,9 +22,9 @@ defmodule Qcl.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:nimble_parsec, "~> 0.2"},
-      {:nimble_csv, "~> 0.3"},
-      {:stream_data, "~> 0.1", only: :test},
+      {:nimble_parsec, "~> 1.0"},
+      {:nimble_csv, "~> 1.0"},
+      {:stream_data, "~> 0.5", only: :test},
       {:circuits_uart, "~> 1.3"},
     ]
   end
