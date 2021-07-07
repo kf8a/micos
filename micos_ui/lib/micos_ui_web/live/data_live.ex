@@ -10,7 +10,7 @@ defmodule MicosUiWeb.DataLive do
   @impl true
   def mount(_params, _session, socket) do
     status = MicosUi.Sampler.status()
-    plots = Samples.get_plots_for_select()
+    plots = Samples.get_plots_for_select(1) # TODO: fix hard coded
     studies = Samples.get_studies_for_select()
 
     fluxes = round5(flux_to_map(status))
@@ -40,7 +40,7 @@ defmodule MicosUiWeb.DataLive do
       ch4_flux: ch4_flux, ch4_r2: ch4_r2}
   end
 
-  def flux_to_map(msg) do
+  def flux_to_map(_msg) do
     # Logger.warn "flux_to_map called with: #{inspect(msg)}"
     %{n2o_flux: 0, n2o_r2: 0,
       co2_flux: 0, co2_r2: 0,
@@ -90,19 +90,27 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
-    IO.puts "validating"
-    IO.inspect params
     status = MicosUi.Sampler.status
     sample = status[:sample]
-    changeset = sample
-                |> Sample.changeset(params)
 
-    if changeset.valid? do
+    plots = MicosUi.Samples.get_plots_for_select(params["study_id"])
+
+    changeset = Sample.changeset(sample, params)
+
+    new_changeset = case Enum.member?(Map.keys(changeset.changes), :study_id) do
+      true ->
+        {_name, id} = hd(plots)
+        Ecto.Changeset.put_change(changeset, :plot_id, id)
+      false ->
+        changeset
+    end
+
+    if new_changeset.valid? do
       {:ok, sample} = Samples.insert_or_update(sample, params)
       MicosUi.Sampler.set_sample(sample)
     end
 
-    {:noreply, assign(socket, sampling: status[:sampling], changeset: changeset) }
+    {:noreply, assign(socket, sampling: status[:sampling], changeset: changeset, plots: plots) }
   end
 
   @impl true

@@ -31,8 +31,10 @@ defmodule MicosUi.Samples do
     Repo.all(Plot)
   end
 
-  def get_plots_for_select() do
-    query = from p in MicosUi.Samples.Plot, select: {p.name, p.id}
+  def get_plots_for_select(study_id) do
+    query = from p in MicosUi.Samples.Plot,
+      select: {p.name, p.id},
+      where: p.study_id == ^study_id
     Repo.all(query)
     # |> Enum.map(fn [name,key] -> %{key: key, option: name} end)
   end

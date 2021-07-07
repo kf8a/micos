@@ -18,15 +18,22 @@ import "phoenix_html"
 //
 // Local files can be imported directly using relative paths, for example:
 import { Socket } from "phoenix";
-
+import topbar from "topbar"
 import {LiveSocket} from "phoenix_live_view"
 
-let liveSocket = new LiveSocket("/live", Socket, {
-  // hooks: Hooks,
-  // params: { _csrf_token: csrfToken },
-});
+let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+// let liveSocket = new LiveSocket("/live", Socket, {
+//   // hooks: Hooks,
+//   params: { _csrf_token: csrfToken },
+// });
+
+topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+window.addEventListener("phx:page-loading-start", info => topbar.show())
+window.addEventListener("phx:page-loading-stop", info => topbar.hide())
 liveSocket.connect()
 
+window.liveSocket = liveSocket
 // d3.select('body')
 //   .append('h5')
 //   .append('text')

@@ -21,6 +21,7 @@ defmodule MicosUi.Samples.Sample do
     field :moisture, :float
     field :deleted, :boolean, default: false
     field :uploaded, :boolean, default: false
+    field :study_id, :integer, virtual: true
     belongs_to :plot, Plot
 
     timestamps()
@@ -32,7 +33,7 @@ defmodule MicosUi.Samples.Sample do
     |> cast(attrs, [:plot_id, :height1, :height2, :height3,
       :n2o_slope, :n2o_r2, :co2_slope, :co2_r2, :ch4_slope, :ch4_r2,
       :air_temperature, :soil_temperature, :moisture, :deleted,
-      :started_at, :finished_at ])
+      :started_at, :finished_at, :study_id ])
      |> validate_required([:plot_id, :height1, :height2, :height3])
   end
 end
