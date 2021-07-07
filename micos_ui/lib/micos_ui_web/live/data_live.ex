@@ -41,7 +41,10 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def flux_to_map(msg) do
-    Logger.warn "flux_to_map called with: #{inspect(msg)}"
+    # Logger.warn "flux_to_map called with: #{inspect(msg)}"
+    %{n2o_flux: 0, n2o_r2: 0,
+      co2_flux: 0, co2_r2: 0,
+      ch4_flux: 0, ch4_r2: 0}
     %{}
   end
 
@@ -87,6 +90,7 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def handle_event("validate",  %{"sample" => params}, socket) do
+    IO.puts "validating"
     IO.inspect params
     status = MicosUi.Sampler.status
     sample = status[:sample]
