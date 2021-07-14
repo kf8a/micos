@@ -20,6 +20,9 @@ use Mix.Config
 #
 config :logger, level: :info
 
+config :instrument, debug: false
+config :instrument, licor_port_serial_number: "FTY3ZUKK"
+config :instrument, qcl_port_serial_number: "FTB3L9SF"
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment

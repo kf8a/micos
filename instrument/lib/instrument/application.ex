@@ -8,7 +8,7 @@ defmodule Instrument.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      Licor.Reader,
+      {Licor.Reader, Application.get_env(:instrument, :licor_port_serial_number)},
       Qcl.Reader,
       { Instrument.Reader, Application.get_env(:instrument, :debug)}
 
