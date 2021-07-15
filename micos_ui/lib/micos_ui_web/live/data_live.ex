@@ -77,7 +77,6 @@ defmodule MicosUiWeb.DataLive do
     MicosUi.Logger.save(%{event: "stop", datetime: DateTime.utc_now})
     MicosUi.Sampler.stop()
     status = MicosUi.Sampler.status()
-    IO.inspect status
     {:noreply, assign(socket, sampling: status[:sampling],
                               changeset: Samples.change_sample(%Sample{})) }
   end
