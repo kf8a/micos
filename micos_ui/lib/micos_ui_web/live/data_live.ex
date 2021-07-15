@@ -28,6 +28,7 @@ defmodule MicosUiWeb.DataLive do
         datum: %Instrument{}, duration: "0:0",
         n2o_flux: '', n2o_r2: '', co2_flux: '', co2_r2: '',
         ch4_flux: '', ch4_r2: '',
+        points: [],
         fluxes: fluxes
       )}
   end
@@ -114,8 +115,26 @@ defmodule MicosUiWeb.DataLive do
   end
 
   @impl true
+  @doc """
+  payload is
+  %Instrument{
+    ch4: 2.084835,
+    co2: 382.96608,
+    datetime: ~U[2021-07-15 10:05:57.739082Z],
+    h2o: 21644.66,
+    minute: 0.0,
+    n2o: 329.6379
+  }
+  """
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
     status = MicosUi.Sampler.status()
+
+    monitor = [
+      %{
+        co2: %{x: payload.datetime, y: payload.co2},
+        n2o: %{x: payload.datetime, y: payload.n2o}
+      }
+    ]
 
     seconds = abs(rem(trunc(payload.minute * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
     minutes = abs(trunc(payload.minute))
@@ -123,7 +142,8 @@ defmodule MicosUiWeb.DataLive do
       true -> "-"
       _ -> " "
     end
-    {:noreply, assign(socket, datum: payload, duration: "#{sign}#{minutes}:#{seconds}")}
+    {:noreply, assign(socket, datum: payload, monitor: monitor,
+      duration: "#{sign}#{minutes}:#{seconds}")}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}} = payload, topic: "data"}, %Phoenix.LiveView.Socket{} = socket) do

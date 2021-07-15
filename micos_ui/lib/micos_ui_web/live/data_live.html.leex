@@ -43,33 +43,36 @@
     <h3>Sample time: <%= @duration %></h3>
   </div>
 
-  <div>
-    <table>
-      <tr>
-        <th></th>
-        <th>Value</th>
-        <th>Flux</th>
-        <th>R2</th>
-      </tr>
-      <tr>
-        <td>N2O (ppb)</td>
-        <td><%= Float.round(@datum.n2o, 2) %>
-          <td> <%= @n2o_flux %></td>
-          <td><%= @n2o_r2 %></td>
-      </tr>
-      <tr>
-        <td>CO2 (ppm)</td>
-        <td><%= Float.round(@datum.co2, 1) %>
-          <td> <%= @co2_flux %></td>
-          <td><%= @co2_r2 %></td>
-      </tr>
-      <tr>
-        <td>CH4 (ppm)</td>
-        <td><%= Float.round(@datum.ch4, 2) %>
-          <td> <%= @ch4_flux %></td>
-          <td><%= @ch4_r2 %></td>
-      </tr>
-    </table>
-  </div>
+<div id="monitor-container" phx-hook="monitor" phx-update="ignore">
+  <canvas id="monitor" width="800" height="300"></canvas>
+</div>
+<div>
+  <table>
+    <tr>
+      <th></th>
+      <th>Value</th>
+      <th>Flux</th>
+      <th>R2</th>
+    </tr>
+    <tr>
+      <td>N2O (ppb)</td>
+      <td><%= Float.round(@datum.n2o, 2) %>
+        <td> <%= @n2o_flux %></td>
+        <td><%= @n2o_r2 %></td>
+    </tr>
+    <tr>
+      <td>CO2 (ppm)</td>
+      <td><%= Float.round(@datum.co2, 1) %>
+        <td> <%= @co2_flux %></td>
+        <td><%= @co2_r2 %></td>
+    </tr>
+    <tr>
+      <td>CH4 (ppm)</td>
+      <td><%= Float.round(@datum.ch4, 2) %>
+        <td> <%= @ch4_flux %></td>
+        <td><%= @ch4_r2 %></td>
+    </tr>
+  </table>
+</div>
 
 </div>
