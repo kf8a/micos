@@ -1,5 +1,5 @@
 <div class="container">
-  <%= f = form_for @changeset, "#", [phx_change: :validate] %>
+  <%= f = form_for @changeset, "#", [phx_submit: :sample, phx_change: :validate] %>
   <label>
     Sample Group: <%= select f, :study_id, @studies %>
   </label>
@@ -30,11 +30,11 @@
   </label>
   </div>
 
-  <button phx-click="sample", phx_disable_with: "sampling..",
-    <%= if !@changeset.valid? || @sampling != :off do %> disabled <% end %>  >Start</button>
-  <button phx-click="stop", phx_disable_with: "next sample...",
+  <button type="button" phx-click="sample", phx_disable_with: "sampling..",
+    <%= if !@changeset.valid? || @sampling != :off do %> disabled <% end %>  > Start</button>
+  <button type='button' phx-click="stop", phx_disable_with: "next sample...",
     <%= if @sampling == :off do %> disabled <% end %>  > Stop</button>
-  <button button-clear, phx-click="abort", phx_disable_with: "aborting...",
+  <button type='button' button-clear, phx-click="abort", phx_disable_with: "aborting...",
     <%= if @sampling == :off do %> disabled <% end %>  > Abort</button>
 
   </form>

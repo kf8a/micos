@@ -64,6 +64,7 @@ defmodule MicosUiWeb.DataLive do
 
   @impl true
   def handle_event("sample", _value, socket) do
+    IO.puts "sample"
     MicosUi.Sampler.start()
     MicosUi.Logger.save(%{event: "start", datetime: DateTime.utc_now})
     status = MicosUi.Sampler.status()
