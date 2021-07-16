@@ -1,12 +1,13 @@
 <div class="container">
   <%= f = form_for @changeset, "#", [phx_submit: :sample, phx_change: :validate] %>
+  <div class="row">
   <label>
     Sample Group: <%= select f, :study_id, @studies %>
   </label>
-
   <label>
     Plot: <%= select f, :plot_id, @plots %>
   </label>
+  </div>
   <div class="row">
   <label>
     Height: <%= number_input f, :height1, min: 0, step: 0.5, size: 20 %>

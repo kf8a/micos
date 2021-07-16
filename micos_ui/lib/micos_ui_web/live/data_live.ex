@@ -7,8 +7,13 @@ defmodule MicosUiWeb.DataLive do
 
   require Logger
 
+  @monitor_interval 3_000
+
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Process.send_after(self(), :monitor, 10)
+    if connected?(socket), do: Process.send_after(self(), :initalize_monitor, 20)
+
     status = MicosUi.Sampler.status()
     plots = Samples.get_plots_for_select(1) # TODO: fix hard coded
     studies = Samples.get_studies_for_select()
@@ -67,7 +72,6 @@ defmodule MicosUiWeb.DataLive do
   def handle_event("sample", _value, socket) do
     IO.puts "sample"
     MicosUi.Sampler.start()
-    MicosUi.Logger.save(%{event: "start", datetime: DateTime.utc_now})
     status = MicosUi.Sampler.status()
 
     live = %{sampling: status[:sampling]}
@@ -75,7 +79,6 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def handle_event("stop", _value, socket) do
-    MicosUi.Logger.save(%{event: "stop", datetime: DateTime.utc_now})
     MicosUi.Sampler.stop()
     status = MicosUi.Sampler.status()
     {:noreply, assign(socket, sampling: status[:sampling],
@@ -83,7 +86,6 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def handle_event("abort", _value, socket) do
-    MicosUi.Logger.save(%{event: "abort", datetime: DateTime.utc_now})
     MicosUi.Sampler.abort()
     status = MicosUi.Sampler.status()
     {:noreply, assign(socket, sampling: status[:sampling],
@@ -115,6 +117,28 @@ defmodule MicosUiWeb.DataLive do
   end
 
   @impl true
+  def handle_info(:monitor, socket) do
+    current = MicosUi.InstrumentMonitor.current_value()
+    Process.send_after(self(), :monitor, @monitor_interval)
+
+    case current do
+      nil ->
+        {:noreply, socket}
+
+      _ ->
+        {:noreply,
+         push_event(socket, "monitor", %{
+           monitor: [
+             %{
+               co2: %{x: current.datetime, y: current.co2},
+               n2o: %{x: current.datetime, y: current.n2o}
+             }
+           ]
+         })}
+    end
+  end
+
+  @impl true
   @doc """
   payload is
   %Instrument{
@@ -122,7 +146,7 @@ defmodule MicosUiWeb.DataLive do
     co2: 382.96608,
     datetime: ~U[2021-07-15 10:05:57.739082Z],
     h2o: 21644.66,
-    minute: 0.0,
+    second: 0.0,
     n2o: 329.6379
   }
   """
@@ -136,8 +160,8 @@ defmodule MicosUiWeb.DataLive do
       }
     ]
 
-    seconds = abs(rem(trunc(payload.minute * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
-    minutes = abs(trunc(payload.minute))
+    seconds = abs(rem(trunc(payload.minutes * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
+    minutes = abs(trunc(payload.minutes))
     sign = case status.sampling == :waiting do
       true -> "-"
       _ -> " "

@@ -10,7 +10,7 @@ defmodule MicosUi.InstrumentMonitor do
   @buffer_size 500
 
   def start_link(_) do
-    GenStage.start_link(__MODULE__, %{current_value: nil}, name: __MODULE__)
+    GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   @doc """

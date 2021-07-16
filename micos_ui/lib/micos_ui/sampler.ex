@@ -1,5 +1,5 @@
 defmodule MicosUi.Sampler do
-  use GenServer
+  use GenStage
 
   alias MicosUiWeb.Endpoint
   alias MicosUi.Fitter
@@ -9,32 +9,32 @@ defmodule MicosUi.Sampler do
   require Logger
 
   # sampling: should be one of :off, :waiting, or :sampling
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, %{interval: 0, sampling: :off, data: [], sample: %Sample{} }, name: MicosUi.Sampler)
+  def start_link(_producer) do
+    GenStage.start_link(__MODULE__, %{producer: Instrument.Producer, interval: 0, sampling: :off, data: [], sample: %Sample{} }, name: __MODULE__)
   end
 
   def init(state) do
-    {:ok, state}
+    {:consumer, state, subscribe_to: [{Instrument.Producer, []}]}
   end
 
-  def status, do: GenServer.call(__MODULE__, :status)
+  def status, do: GenStage.call(__MODULE__, :status)
 
-  def current_data(), do: GenServer.call(__MODULE__, :data)
+  def current_data(), do: GenStage.call(__MODULE__, :data)
 
   def start() do
-    GenServer.cast(__MODULE__, :start)
+    GenStage.cast(__MODULE__, :start)
   end
 
   def stop() do
-    GenServer.cast(__MODULE__, :stop)
+    GenStage.cast(__MODULE__, :stop)
   end
 
   def abort() do
-    GenServer.cast(__MODULE__, :abort)
+    GenStage.cast(__MODULE__, :abort)
   end
 
   def set_sample(%Sample{} = sample) do
-    GenServer.cast(__MODULE__, {:sample, sample})
+    GenStage.cast(__MODULE__, {:sample, sample})
   end
 
   def save_sample_flux(%Sample{} = sample, %{ch4_flux: %{slope: ch4_flux, r2: ch4_r2},
@@ -83,26 +83,26 @@ defmodule MicosUi.Sampler do
   end
 
   def handle_cast({:sample, sample}, state) do
-    {:noreply, Map.put(state, :sample, sample)}
+    {:noreply, [], Map.put(state, :sample, sample)}
   end
 
   def handle_cast(:abort, %{sampling: :sampling} = state) do
-    unsubscribe()
+    Endpoint.unsubscribe("data")
     sample = state[:sample]
     Task.start(fn() -> abort_sample(sample) end)
 
     state = state
             |> Map.put(:sampling, :off)
             |> Map.put(:sample, %Sample{})
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   def handle_cast(:abort, state) do
-    {:noreply, Map.put(state, :sampling, :off)}
+    {:noreply, [], Map.put(state, :sampling, :off)}
   end
 
   def handle_cast(:stop, %{sampling: :sampling} = state) do
-    unsubscribe()
+    Endpoint.unsubscribe("data")
 
     sample = state[:sample]
 
@@ -119,39 +119,40 @@ defmodule MicosUi.Sampler do
     state = state
             |> Map.put(:sampling, :off)
             |> Map.put(:sample, %Sample{})
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   def handle_cast(:stop, state) do
-    {:noreply, Map.put(state, :sampling, :off)}
+    {:noreply, [], Map.put(state, :sampling, :off)}
   end
 
   def handle_cast(:start, state) do
     Process.send_after(self(), :sample, 120_000)
 
-    subscribe()
+    Endpoint.subscribe("data")
 
     state = state
             |> Map.put(:sampling, :waiting)
             |> Map.put(:sample_start_time, DateTime.utc_now())
 
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   def handle_call(:status, _from, state) do
-    {:reply, state, state}
+    {:reply, state, [], state}
   end
 
   def handle_call(:data, _from, state) do
-    {:reply, state[:data], state}
+    {:reply, state[:data], [], state}
   end
 
   def prep_datum(%Instrument{} = datum, start_time) do
-    Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
+    Map.put(datum, :minutes, DateTime.diff(datum.datetime, start_time, :second)/60)
   end
 
-  def handle_info(:tick, state) do
-    {:noreply, state}
+  def handle_events(events, _from, state) when is_list(events) and length(events) > 0 do
+    Enum.each(events, fn(event) -> Process.send_after(self(),event, 1) end)
+    {:noreply,  [], state}
   end
 
   # start sampling
@@ -168,7 +169,7 @@ defmodule MicosUi.Sampler do
             |> Map.put(:co2_flux, %{})
             |> Map.put(:ch4_flux, %{})
 
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   # We are sampling and collecting data
@@ -193,19 +194,19 @@ defmodule MicosUi.Sampler do
     # emit event to frontend
     Endpoint.broadcast_from(self(), "data", "new", new_datum)
 
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   # we are listening and waiting to start
   def handle_info(%Instrument{} = datum, %{sampling: :waiting} = state) do
-    new_datum = Map.put(datum, :minute, DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 )
+    new_datum = Map.put(datum, :minutes, DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 )
     Endpoint.broadcast_from(self(), "data", "new", new_datum)
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   def handle_info(%Instrument{} = datum, state) do
     Endpoint.broadcast_from(self(), "data", "new", datum)
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   def handle_info(%{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, state) do
@@ -216,21 +217,12 @@ defmodule MicosUi.Sampler do
             |> Map.put(:ch4_flux, ch4_flux)
 
     Endpoint.broadcast_from(self(), "data", "flux", %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux})
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
   def handle_info(data, state) do
     Logger.warn "unknown #{inspect(data)}"
-    {:noreply, state}
+    {:noreply, [], state}
   end
 
-  defp subscribe() do
-    Instrument.register(self())
-    Endpoint.subscribe("data")
-  end
-
-  defp unsubscribe() do
-    Instrument.unregister(self())
-    Endpoint.unsubscribe("data")
-  end
 end
