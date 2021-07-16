@@ -11,10 +11,10 @@ defmodule MicosUi.Application do
       # Start the endpoint when the application starts
       MicosUi.Repo,
       {Phoenix.PubSub, [name: MicosUi.PubSub, adapter: Phoenix.PubSub.PG2]},
+      {Instrument.Reader, Application.get_env(:instrument, :debug)},
       MicosUiWeb.Endpoint,
       # Start Sampler
       MicosUi.Sampler,
-      MicosUi.DataPump,
       MicosUi.Uploader,
     ]
 

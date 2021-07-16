@@ -32,7 +32,8 @@ defmodule MicosUi.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:instrument, path: "../instrument"},
+      # {:instrument, path: "../instrument"},
+      {:instrument, git: "git@gitlab.com:kf8a/instrument.git"},
       {:phoenix, "~> 1.5"},
       {:phoenix_pubsub, "~> 2.0"},
 			{:phoenix_ecto, "~> 4.0"},
