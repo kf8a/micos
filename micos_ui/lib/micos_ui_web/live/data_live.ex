@@ -12,7 +12,7 @@ defmodule MicosUiWeb.DataLive do
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket), do: Process.send_after(self(), :monitor, 10)
-    if connected?(socket), do: Process.send_after(self(), :initalize_monitor, 20)
+    # if connected?(socket), do: Process.send_after(self(), :initalize_monitor, 20)
 
     status = MicosUi.Sampler.status()
     plots = Samples.get_plots_for_select(1) # TODO: fix hard coded
@@ -160,8 +160,8 @@ defmodule MicosUiWeb.DataLive do
       }
     ]
 
-    seconds = abs(rem(trunc(payload.minutes * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
-    minutes = abs(trunc(payload.minutes))
+    seconds = abs(rem(trunc(payload.minute * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
+    minutes = abs(trunc(payload.minute))
     sign = case status.sampling == :waiting do
       true -> "-"
       _ -> " "
