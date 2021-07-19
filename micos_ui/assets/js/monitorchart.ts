@@ -117,6 +117,9 @@ export const monitorChart = (ctx: HTMLCanvasElement) => {
           bottom: 20,
         },
       },
+      plugins: {
+        tooltip: { enabled: false}
+      }
     },
   });
 };

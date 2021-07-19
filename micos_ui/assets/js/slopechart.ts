@@ -97,8 +97,9 @@ export const slopeChart = (ctx: HTMLCanvasElement) => {
     data: {
       datasets: [
         {
-          label: "r2", backgroundColor: "blue", data: [] },
-        { label: "slope", backgroundColor: "red", data: []},
+          label: "co2", backgroundColor: "blue", data: [] },
+        { label: "n2o", backgroundColor: "red", data: []},
+        { label: "ch4", backgroundColor: "green", data: []},
       ],
     },
     options: {
