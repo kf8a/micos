@@ -15,7 +15,7 @@ defmodule MicosUi.Application do
       {Instrument.Reader, Application.get_env(:instrument, :debug)},
       MicosUi.InstrumentMonitor,
       # Start Sampler
-      MicosUi.Sampler,
+      {MicosUi.Sampler, Instrument.Producer},
       MicosUi.Uploader,
     ]
 

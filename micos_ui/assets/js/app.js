@@ -3,9 +3,6 @@
 // its own CSS file.
 import css from "../css/app.css"
 
-// import d3 stuff
-// import * as d3 from "d3";
-
 //// webpack automatically bundles all modules in your
 // entry points. Those entry points can be configured
 // in "webpack.config.js".
@@ -22,15 +19,22 @@ import NProgress from "nprogress";
 import topbar from "topbar"
 import {LiveSocket} from "phoenix_live_view"
 import { monitorChart, addToMonitor } from "./monitorchart";
+import { slopeChart, addToChart} from "./slopechart";
 
 let monitor_element = document.getElementById("monitor");
 let monChart = monitorChart(monitor_element);
+
+let slope_element = document.getElementById("slope");
+let sChart = slopeChart(slope_element);
 
 let Hooks = {};
 Hooks.monitor = {
   mounted() {
     this.handleEvent("monitor", ({ monitor }) =>
       addToMonitor(monChart, monitor)
+    );
+    this.handleEvent("slope", ({ monitor }) =>
+      addToChart(sChart, monitor)
     );
   },
 };

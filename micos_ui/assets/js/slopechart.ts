@@ -2,46 +2,69 @@ import {
   Chart,
   ArcElement,
   LineElement,
+  BarElement,
   PointElement,
+  BarController,
+  BubbleController,
+  DoughnutController,
   LineController,
+  PieController,
+  PolarAreaController,
+  RadarController,
   ScatterController,
+  CategoryScale,
   LinearScale,
+  LogarithmicScale,
+  RadialLinearScale,
   TimeScale,
   TimeSeriesScale,
   Decimation,
   Filler,
   Legend,
   Title,
+  Tooltip
 } from 'chart.js';
-import 'chartjs-adapter-date-fns';
 
 Chart.register(
   ArcElement,
   LineElement,
+  BarElement,
   PointElement,
+  BarController,
+  BubbleController,
+  DoughnutController,
   LineController,
+  PieController,
+  PolarAreaController,
+  RadarController,
   ScatterController,
+  CategoryScale,
   LinearScale,
+  LogarithmicScale,
+  RadialLinearScale,
   TimeScale,
   TimeSeriesScale,
   Decimation,
   Filler,
   Legend,
   Title,
+  Tooltip
 );
 
 interface dataValue {
-  co2: {x: number, y: number};
-  n2o: {x: number, y: number};
+  co2: {x: number, y: number, r: number};
+  n2o: {x: number, y: number, r: number};
+  ch4: {x: number, y: number, r: number};
 }
 
-export const addToMonitor = (chart: Chart, data: [dataValue]) => {
+export const addToChart = (chart: Chart, data: [dataValue]) => {
   if (
     chart === undefined ||
     chart.data === undefined ||
     chart.data.datasets === undefined ||
     chart.data.datasets[0].data === undefined ||
-    chart.data.datasets[1].data === undefined
+    chart.data.datasets[1].data === undefined ||
+    chart.data.datasets[2].data === undefined
   ) {
     return;
   }
@@ -49,12 +72,14 @@ export const addToMonitor = (chart: Chart, data: [dataValue]) => {
     if (
       chart.data.datasets === undefined ||
       chart.data.datasets[0].data === undefined ||
-      chart.data.datasets[1].data === undefined
+      chart.data.datasets[1].data === undefined ||
+      chart.data.datasets[2].data === undefined
     ) {
       return;
     }
     chart.data.datasets[0].data.push(datum["co2"]);
     chart.data.datasets[1].data.push(datum["n2o"]);
+    chart.data.datasets[2].data.push(datum["ch4"]);
   });
 
   while (chart.data.datasets[0].data.length > 90) {
@@ -66,48 +91,33 @@ export const addToMonitor = (chart: Chart, data: [dataValue]) => {
   chart.update();
 };
 
-export const monitorChart = (ctx: HTMLCanvasElement) => {
+export const slopeChart = (ctx: HTMLCanvasElement) => {
   return new Chart(ctx, {
-    type: "scatter",
+    type: "bubble",
     data: {
       datasets: [
         {
-          label: "CO2", backgroundColor: "blue", data: [], yAxisID: "co2"},
-        { label: "N2O", backgroundColor: "red", data: [], yAxisID: "n2o" },
+          label: "r2", backgroundColor: "blue", data: [] },
+        { label: "slope", backgroundColor: "red", data: []},
       ],
     },
     options: {
       scales: {
-        co2: {
-          title: {
-            display: true,
-            text: "ppm CO2",
-            color: "blue",
+        y: {
+            title: {
+              display: true,
+              text: "slope",
+              color: "blue",
+            },
+            position: "left",
+            beginAtZero: false,
           },
-          position: "left",
-          ticks: {
-          },
-          // id: "co2-axis",
-          beginAtZero: false,
-        },
-        n2o: {
-          title: {
-            display: true,
-            text: "ppb N2O",
-            color: "red",
-          },
-          position: "right",
-          beginAtZero: false,
-          grid: {
-            drawOnChartArea: false,
-          },
-        },
         x: {
-          type: "time",
-          time: {
-            unit: "minute",
+            type: "time",
+            time: {
+              unit: "minute",
+            },
           },
-        },
       },
       layout: {
         padding: {

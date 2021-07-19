@@ -1,4 +1,10 @@
 defmodule MicosUi.Sampler do
+  @moduledoc """
+  Orchestrates the sampling and calculation. It is subscribed to the instrument producer and accumulates samples.
+
+  This sampler has 3 states. It starts out in :off then moves to :waiting, to :sampling and back to :off
+
+  """
   use GenStage
 
   alias MicosUiWeb.Endpoint
@@ -9,26 +15,40 @@ defmodule MicosUi.Sampler do
   require Logger
 
   # sampling: should be one of :off, :waiting, or :sampling
-  def start_link(_producer) do
-    GenStage.start_link(__MODULE__, %{producer: Instrument.Producer, interval: 0, sampling: :off, data: [], sample: %Sample{} }, name: __MODULE__)
+  def start_link(producer) do
+    GenStage.start_link(__MODULE__, %{producer: producer, interval: 0, sampling: :off, data: [], sample: %Sample{} }, name: __MODULE__)
   end
 
+  @impl true
   def init(state) do
-    {:consumer, state, subscribe_to: [{Instrument.Producer, []}]}
+    producer = state[:producer]
+    {:consumer, state, subscribe_to: [{producer, []}]}
   end
 
   def status, do: GenStage.call(__MODULE__, :status)
 
+  @doc """
+  Return the current accumulated data of the module
+  """
   def current_data(), do: GenStage.call(__MODULE__, :data)
 
+  @doc """
+  start a new sample. This starts the 2 minute countdown timer and then starts to collect sample values
+  """
   def start() do
     GenStage.cast(__MODULE__, :start)
   end
 
+  @doc """
+  Stop and save a sample
+  """
   def stop() do
     GenStage.cast(__MODULE__, :stop)
   end
 
+  @doc """
+  Abort a sample
+  """
   def abort() do
     GenStage.cast(__MODULE__, :abort)
   end
@@ -82,10 +102,15 @@ defmodule MicosUi.Sampler do
     Process.send(pid, %{n2o_flux: n2o_flux, co2_flux: co2_flux, ch4_flux: ch4_flux}, [])
   end
 
+  @doc """
+  Set the state to sampling
+  """
+  @impl true
   def handle_cast({:sample, sample}, state) do
     {:noreply, [], Map.put(state, :sample, sample)}
   end
 
+  @impl true
   def handle_cast(:abort, %{sampling: :sampling} = state) do
     Endpoint.unsubscribe("data")
     sample = state[:sample]
@@ -97,10 +122,12 @@ defmodule MicosUi.Sampler do
     {:noreply, [], state}
   end
 
+  @impl true
   def handle_cast(:abort, state) do
     {:noreply, [], Map.put(state, :sampling, :off)}
   end
 
+  @impl true
   def handle_cast(:stop, %{sampling: :sampling} = state) do
     Endpoint.unsubscribe("data")
 
@@ -138,10 +165,12 @@ defmodule MicosUi.Sampler do
     {:noreply, [], state}
   end
 
+  @impl true
   def handle_call(:status, _from, state) do
     {:reply, state, [], state}
   end
 
+  @impl true
   def handle_call(:data, _from, state) do
     {:reply, state[:data], [], state}
   end
@@ -150,12 +179,18 @@ defmodule MicosUi.Sampler do
     Map.put(datum, :minutes, DateTime.diff(datum.datetime, start_time, :second)/60)
   end
 
+  @impl true
   def handle_events(events, _from, state) when is_list(events) and length(events) > 0 do
+    # when events arrive send them off to ourselves individually
+    # TODO: it should handle the new events directly instead of redirecting
     Enum.each(events, fn(event) -> Process.send_after(self(),event, 1) end)
     {:noreply,  [], state}
   end
 
-  # start sampling
+  @doc """
+  start sampling
+  """
+  @impl true
   def handle_info(:sample, state) do
     now = DateTime.utc_now
     {:ok, sample} = Samples.update_sample(state[:sample], %{started_at: now})

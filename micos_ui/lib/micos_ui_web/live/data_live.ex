@@ -7,12 +7,12 @@ defmodule MicosUiWeb.DataLive do
 
   require Logger
 
-  @monitor_interval 3_000
+  @monitor_interval 5_000
+  @slope_interval 5_000
 
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket), do: Process.send_after(self(), :monitor, 10)
-    if connected?(socket), do: Process.send_after(self(), :initalize_monitor, 20)
 
     status = MicosUi.Sampler.status()
     plots = Samples.get_plots_for_select(1) # TODO: fix hard coded
@@ -47,7 +47,6 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def flux_to_map(_msg) do
-    # Logger.warn "flux_to_map called with: #{inspect(msg)}"
     %{n2o_flux: 0, n2o_r2: 0,
       co2_flux: 0, co2_r2: 0,
       ch4_flux: 0, ch4_r2: 0}
@@ -138,9 +137,18 @@ defmodule MicosUiWeb.DataLive do
     end
   end
 
+  def handle_info(:slope, socket) do
+    # current = MicosUi.Sampler.current_data()
+    # Process.send_after(self(), :monitor, @slope_interval)
+
+    {:noreply, socket}
+  end
+
   @impl true
   @doc """
   payload is
+
+  ```
   %Instrument{
     ch4: 2.084835,
     co2: 382.96608,
@@ -149,6 +157,7 @@ defmodule MicosUiWeb.DataLive do
     second: 0.0,
     n2o: 329.6379
   }
+  ```
   """
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
     status = MicosUi.Sampler.status()

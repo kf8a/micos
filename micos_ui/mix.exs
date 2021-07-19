@@ -49,6 +49,7 @@ defmodule MicosUi.MixProject do
       {:learn_kit, "~> 0.1.6"},
       {:benchee, "~> 1.0", only: :dev},
       {:httpoison, "~> 1.8"},
+      {:ex_doc, "~> 0.24.2", only: :dev},
       {:phoenix_live_view, "~> 0.15.7"},
     ]
   end
