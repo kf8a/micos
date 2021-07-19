@@ -176,7 +176,7 @@ defmodule MicosUi.Sampler do
   end
 
   def prep_datum(%Instrument{} = datum, start_time) do
-    Map.put(datum, :minutes, DateTime.diff(datum.datetime, start_time, :second)/60)
+    Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
   end
 
   @impl true
@@ -234,7 +234,7 @@ defmodule MicosUi.Sampler do
 
   # we are listening and waiting to start
   def handle_info(%Instrument{} = datum, %{sampling: :waiting} = state) do
-    new_datum = Map.put(datum, :minutes, DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 )
+    new_datum = Map.put(datum, :minute, DateTime.diff(DateTime.utc_now(), state[:sample_start_time], :second)/60 - 2 )
     Endpoint.broadcast_from(self(), "data", "new", new_datum)
     {:noreply, [], state}
   end
