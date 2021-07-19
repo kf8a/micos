@@ -138,8 +138,8 @@ defmodule MicosUiWeb.DataLive do
   end
 
   def handle_info(:slope, socket) do
-    # current = MicosUi.Sampler.current_data()
-    # Process.send_after(self(), :monitor, @slope_interval)
+    current = MicosUi.Sampler.current_data()
+              |>IO.inspect
 
     {:noreply, socket}
   end
@@ -162,21 +162,13 @@ defmodule MicosUiWeb.DataLive do
   def handle_info(%Phoenix.Socket.Broadcast{event: "new", payload: payload, topic: "data"} = _event, %Phoenix.LiveView.Socket{} = socket) do
     status = MicosUi.Sampler.status()
 
-    monitor = [
-      %{
-        co2: %{x: payload.datetime, y: payload.co2},
-        n2o: %{x: payload.datetime, y: payload.n2o}
-      }
-    ]
-
     seconds = abs(rem(trunc(payload.minutes * 60), 60)) |> Integer.to_string |> String.pad_leading(2, "0")
     minutes = abs(trunc(payload.minutes))
     sign = case status.sampling == :waiting do
       true -> "-"
       _ -> " "
     end
-    {:noreply, assign(socket, datum: payload, monitor: monitor,
-      duration: "#{sign}#{minutes}:#{seconds}")}
+    {:noreply, assign(socket, datum: payload, duration: "#{sign}#{minutes}:#{seconds}")}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "flux", payload: %{ch4_flux: {:error}, co2_flux: {:error}, n2o_flux: {:error}} = payload, topic: "data"}, %Phoenix.LiveView.Socket{} = socket) do
@@ -193,6 +185,7 @@ defmodule MicosUiWeb.DataLive do
               co2_flux: co2[:slope], co2_r2: co2[:r2],
               ch4_flux: ch4[:slope], ch4_r2: ch4[:r2]}
 
+    Process.send_after(self(), :update_slope,10)
     {:noreply, assign(socket, round5(fluxes)) }
   end
 
