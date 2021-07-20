@@ -208,9 +208,10 @@ defmodule MicosUiWeb.DataLive do
     fluxes = %{n2o_flux: n2o[:slope], n2o_r2: n2o[:r2],
               co2_flux: co2[:slope], co2_r2: co2[:r2],
               ch4_flux: ch4[:slope], ch4_r2: ch4[:r2]}
-
-    Process.send_after(self(), :slope, 10)
-    Process.send_after(self(), :r2, 10)
+    if (payload.minute > 1) do
+      Process.send_after(self(), :slope, 10)
+      Process.send_after(self(), :r2, 10)
+    end
     {:noreply, assign(socket, round5(fluxes)) }
   end
 
