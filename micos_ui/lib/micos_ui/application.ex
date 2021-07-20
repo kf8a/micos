@@ -12,7 +12,7 @@ defmodule MicosUi.Application do
       MicosUi.Repo,
       {Phoenix.PubSub, [name: MicosUi.PubSub, adapter: Phoenix.PubSub.PG2]},
       MicosUiWeb.Endpoint,
-      {Instrument.Reader, true}, # Application.get_env(:instrument, :debug)},
+      {Instrument.Reader, Application.get_env(:instrument, :debug)},
       MicosUi.InstrumentMonitor,
       # Start Sampler
       {MicosUi.Sampler, Instrument.Producer},
