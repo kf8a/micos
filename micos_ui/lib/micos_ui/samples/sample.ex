@@ -3,6 +3,7 @@ defmodule MicosUi.Samples.Sample do
   import Ecto.Changeset
 
   alias MicosUi.Samples.Plot
+  alias MicosUi.Samples.Study
 
   schema "samples" do
     field :finished_at, :utc_datetime_usec
@@ -21,8 +22,9 @@ defmodule MicosUi.Samples.Sample do
     field :moisture, :float
     field :deleted, :boolean, default: false
     field :uploaded, :boolean, default: false
-    field :study_id, :integer, virtual: true
+    # field :study_id, :integer, virtual: true
     belongs_to :plot, Plot
+    belongs_to :study, Study
 
     timestamps()
   end

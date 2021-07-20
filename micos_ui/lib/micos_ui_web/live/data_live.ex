@@ -15,7 +15,8 @@ defmodule MicosUiWeb.DataLive do
 
     status = MicosUi.Sampler.status()
     studies = Samples.get_studies_for_select()
-    plots = Samples.get_plots_for_select(1) # TODO: fix hard coded
+    # plots = Samples.get_plots_for_select(1) # TODO: fix hard coded
+    plots = []
 
     fluxes = round5(flux_to_map(status))
 
@@ -192,7 +193,7 @@ defmodule MicosUiWeb.DataLive do
       true -> "-"
       _ -> " "
     end
-    {:noreply, assign(socket, datum: payload, duration: "#{sign}#{minutes}:#{seconds}", seconds: pyload.minute * 60)}
+    {:noreply, assign(socket, datum: payload, duration: "#{sign}#{minutes}:#{seconds}", seconds: payload.minute * 60)}
     # {:noreply, assign(socket, duration: "#{sign}#{minutes}:#{seconds}")}
   end
 
@@ -209,8 +210,8 @@ defmodule MicosUiWeb.DataLive do
     fluxes = %{n2o_flux: n2o[:slope], n2o_r2: n2o[:r2],
               co2_flux: co2[:slope], co2_r2: co2[:r2],
               ch4_flux: ch4[:slope], ch4_r2: ch4[:r2]}
-              
-    if (socket.assings().seconds > 60) do
+
+    if (socket.assigns.seconds > 60) do
       Process.send_after(self(), :slope, 10)
       Process.send_after(self(), :r2, 10)
     end
