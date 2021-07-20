@@ -24,3 +24,10 @@
   fill: none;
   stroke: steelblue;
 }
+
+.graphs {
+  display: grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap: 0;
+  grid-auto-rows: minmax(200px, auto);
+}

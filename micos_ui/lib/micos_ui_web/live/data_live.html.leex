@@ -45,10 +45,15 @@
   </div>
 
 <div id="monitor-container" phx-hook="monitor" phx-update="ignore">
-  <canvas id="monitor" width="600" height="300"></canvas>
+  <canvas id="monitor" width="600" height="200"></canvas>
 </div>
-<div id="slope-container" phx-hook="slope" phx-update="ignore">
-  <canvas id="slope" width="600" height="300"></canvas>
+<div class="graphs">
+  <div id="slope-container" phx-hook="slope" phx-update="ignore" style=" position: relative;" >
+  <canvas id="slope" width="600" height="200"></canvas>
+  </div>
+  <div id="r2-container" phx-hook="r2" phx-update="ignore" style=" position: relative;" >
+  <canvas id="r2" width="600" height="200"></canvas>
+  </div>
 </div>
 
 <div>

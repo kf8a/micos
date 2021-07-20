@@ -33,6 +33,11 @@ defmodule MicosUi.Sampler do
   def current_data(), do: GenStage.call(__MODULE__, :data)
 
   @doc """
+  return the current flux calculations
+  """
+  def current_fluxes(), do: GenStage.call(__MODULE__, :fluxes)
+
+  @doc """
   start a new sample. This starts the 2 minute countdown timer and then starts to collect sample values
   """
   def start() do
@@ -175,6 +180,16 @@ defmodule MicosUi.Sampler do
     {:reply, state[:data], [], state}
   end
 
+  @impl true
+  def handle_call(:fluxes, _from, state) do
+    data = %{
+      co2: state[:co2_flux],
+      n2o: state[:n2o_flux],
+      ch4: state[:ch4_flux]
+    }
+    {:reply, data, [], state}
+  end
+
   def prep_datum(%Instrument{} = datum, start_time) do
     Map.put(datum, :minute, DateTime.diff(datum.datetime, start_time, :second)/60)
   end
@@ -214,7 +229,7 @@ defmodule MicosUi.Sampler do
 
     # every 30 seconds or so
     # compute the current fluxes
-    interval = rem(state[:interval] + 1, 30)
+    interval = rem(state[:interval] + 1, 10)
     if interval == 0 do
       Task.start(__MODULE__, :compute_fluxes, [data, self()])
     end

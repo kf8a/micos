@@ -57,7 +57,7 @@ interface dataValue {
   ch4: {x: number, y: number, r: number};
 }
 
-export const addToChart = (chart: Chart, data: [dataValue]) => {
+export const addToChart = (chart: Chart, data: dataValue) => {
   if (
     chart === undefined ||
     chart.data === undefined ||
@@ -67,25 +67,15 @@ export const addToChart = (chart: Chart, data: [dataValue]) => {
     chart.data.datasets[2].data === undefined
   ) {
     return;
-  }
-  data.forEach(function (datum) {
-    if (
-      chart.data.datasets === undefined ||
-      chart.data.datasets[0].data === undefined ||
-      chart.data.datasets[1].data === undefined ||
-      chart.data.datasets[2].data === undefined
-    ) {
-      return;
-    }
-    chart.data.datasets[0].data.push(datum["co2"]);
-    chart.data.datasets[1].data.push(datum["n2o"]);
-    chart.data.datasets[2].data.push(datum["ch4"]);
-  });
+  };
+  chart.data.datasets[0].data.push(data.co2);
+  chart.data.datasets[1].data.push(data.n2o);
+  chart.data.datasets[2].data.push(data.ch4);
 
-  while (chart.data.datasets[0].data.length > 90) {
+  while (chart.data.datasets[0].data.length > 60) {
     chart.data.datasets[0].data.shift();
   }
-  while (chart.data.datasets[1].data.length > 90) {
+  while (chart.data.datasets[1].data.length > 60) {
     chart.data.datasets[1].data.shift();
   }
   chart.update();
@@ -128,6 +118,9 @@ export const slopeChart = (ctx: HTMLCanvasElement) => {
           bottom: 20,
         },
       },
+      plugins: {
+        tooltip: { enabled: false}
+      }
     },
   });
 };
