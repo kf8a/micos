@@ -18,7 +18,7 @@ import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import topbar from "topbar"
 import {LiveSocket} from "phoenix_live_view"
-import { monitorChart, addToChart} from "./monitorchart";
+import { monitorChart, addToChart, clearChart} from "./monitorchart";
 
 let monitor_element = document.getElementById("monitor")
 let monChart = monitorChart(monitor_element, "ppm CO2/ppb N2O", "ppm CH4");
@@ -38,11 +38,13 @@ Hooks.monitor = {
 Hooks.slope = {
   mounted() {
     this.handleEvent("slope", ({ monitor }) => addToChart(sChart, monitor));
+    this.handleEvent("reset", () => clearChart(sChart));
   }
 }
 Hooks.r2 = {
   mounted() {
     this.handleEvent("r2", ({ monitor }) => addToChart(rChart, monitor));
+    this.handleEvent("reset", () => clearChart(rChart));
   }
 }
 

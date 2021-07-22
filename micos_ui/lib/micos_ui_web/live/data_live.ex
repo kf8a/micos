@@ -74,6 +74,7 @@ defmodule MicosUiWeb.DataLive do
     MicosUi.Sampler.start()
     status = MicosUi.Sampler.status()
 
+    Process.send_after(self(), :clear_chart, 10)
     live = %{sampling: status[:sampling]}
     {:noreply, assign(socket, Map.merge(live, round5(flux_to_map(status)))) }
   end
@@ -137,6 +138,10 @@ defmodule MicosUiWeb.DataLive do
            ]
          })}
     end
+  end
+
+  def handle_info(:clear_chart,socket) do
+    {:noreply, push_event(socket, "reset", %{}) }
   end
 
   def handle_info(:slope, socket) do

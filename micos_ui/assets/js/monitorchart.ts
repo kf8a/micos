@@ -36,6 +36,13 @@ interface dataValue {
   ch4: {x: number, y: number};
 }
 
+export const clearChart = (chart: Chart) => {
+  chart.data.datasets[0].data = [];
+  chart.data.datasets[1].data = [];
+  chart.data.datasets[2].data = [];
+  chart.update();
+}
+
 export const addToChart = (chart: Chart, data: [dataValue]) => {
   if (
     chart === undefined ||
@@ -61,16 +68,20 @@ export const addToChart = (chart: Chart, data: [dataValue]) => {
     chart.data.datasets[2].data.push(datum["ch4"]);
   });
 
-  while (chart.data.datasets[0].data.length > 90) {
+  let max_points = 90;
+  while (chart.data.datasets[0].data.length > max_points) {
     chart.data.datasets[0].data.shift();
   }
-  while (chart.data.datasets[1].data.length > 90) {
+  while (chart.data.datasets[1].data.length > max_points) {
     chart.data.datasets[1].data.shift();
+  }
+  while (chart.data.datasets[2].data.length > max_points) {
+    chart.data.datasets[2].data.shift();
   }
   chart.update();
 };
 
-export const monitorChart = (ctx: HTMLCanvasElement, y1_title: string, y2_title: string) => {
+export const monitorChart = (ctx: HTMLCanvasElement, y1_title: string, y2_title: string ) => {
   return new Chart(ctx, {
     type: "scatter",
     data: {
