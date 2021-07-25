@@ -19,6 +19,7 @@ import NProgress from "nprogress";
 import topbar from "topbar"
 import {LiveSocket} from "phoenix_live_view"
 import { monitorChart, addToChart, clearChart} from "./monitorchart";
+import { RSQChart, addToRSQChart, clearRSQChart } from "./rsquarechart";
 
 let monitor_element = document.getElementById("monitor")
 let monChart = monitorChart(monitor_element, "ppm CO2/ppb N2O", "ppm CH4");
@@ -27,7 +28,7 @@ let slope_element = document.getElementById("slope");
 let sChart = monitorChart(slope_element, "slope CO2/N2O", "slope CH4");
 
 let r_element = document.getElementById("r2");
-let rChart = monitorChart(r_element, "r2 CO2/N2O", "r2 CH4");
+let rChart = RSQChart(r_element, "r2");
 
 let Hooks = {};
 Hooks.monitor = {
@@ -43,8 +44,8 @@ Hooks.slope = {
 }
 Hooks.r2 = {
   mounted() {
-    this.handleEvent("r2", ({ monitor }) => addToChart(rChart, monitor));
-    this.handleEvent("reset", () => clearChart(rChart));
+    this.handleEvent("r2", ({ monitor }) => addToRSQChart(rChart, monitor));
+    this.handleEvent("reset", () => clearRSQChart(rChart));
   }
 }
 
