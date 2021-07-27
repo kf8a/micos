@@ -68,7 +68,7 @@ export const addToChart = (chart: Chart, data: [dataValue]) => {
     chart.data.datasets[2].data.push(datum["ch4"]);
   });
 
-  let max_points = 90;
+  let max_points = 180;
   while (chart.data.datasets[0].data.length > max_points) {
     chart.data.datasets[0].data.shift();
   }
